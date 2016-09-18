@@ -17,6 +17,8 @@
 #include <linux/sort.h>
 #include <linux/reboot.h>
 #include <linux/debugfs.h>
+#include <linux/sysfs.h>
+#include <linux/exynos-interface.h>
 
 #include <linux/fs.h>
 #include <asm/segment.h>
@@ -34,6 +36,12 @@
 #define POLLING_MSEC_DISP_ON	1000
 #define POLLING_MSEC_DISP_OFF	100
 #define DEFAULT_LOW_STAY_THRSHD	0
+
+#define MIN_NUM_ONLINE_CPU	1
+#define MAX_NUM_ONLINE_CPU	NR_CPUS
+
+unsigned int min_num_cpu;
+unsigned int max_num_cpu;
 
 struct cpu_load_info {
 	cputime64_t cpu_idle;
@@ -307,6 +315,91 @@ static ssize_t store_dm_hotplug_delay(struct kobject *kobj, struct attribute *at
 	return count;
 }
 
+static ssize_t show_cpucore_table(struct kobject *kobj,
+			     struct attribute *attr, char *buf)
+{
+	int i, num_cpu, count = 0;
+
+	num_cpu = num_online_cpus();
+	for (i = num_cpu; i > 0; i--)
+		count += sprintf(&buf[count], "%d ", i);
+
+	count += sprintf(&buf[count], "\n");
+	return count;
+}
+
+static ssize_t show_cpucore_min_num_limit(struct kobject *kobj,
+			     struct attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", min_num_cpu);
+}
+
+static ssize_t show_cpucore_max_num_limit(struct kobject *kobj,
+			     struct attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", max_num_cpu);
+}
+
+static ssize_t store_cpucore_min_num_limit(struct kobject *kobj,
+			struct attribute *attr, const char *buf, size_t count)
+{
+	int input;
+
+	if (!sscanf(buf, "%u", &input))
+		return -EINVAL;
+
+	if (input < 0 || input > 7) {
+		pr_err("Must keep input range 0 ~ 7\n");
+		return -EINVAL;
+	}
+
+	pr_info("Not yet supported\n");
+
+	min_num_cpu = input;
+
+	return count;
+}
+
+static ssize_t store_cpucore_max_num_limit(struct kobject *kobj,
+			struct attribute *attr, const char *buf, size_t count)
+{
+	int input, delta, cpu;
+
+	if (!sscanf(buf, "%u", &input))
+		return -EINVAL;
+
+	if (input < 1 || input > 8) {
+		pr_err("Must keep input range 1 ~ 8\n");
+		return -EINVAL;
+	}
+
+	delta = input - num_online_cpus();
+
+	if (delta > 0) {
+		cpu = 1;
+		while (delta) {
+			if (!cpu_online(cpu)) {
+				cpu_up(cpu);
+				delta--;
+			}
+			cpu++;
+		}
+	} else if (delta < 0) {
+		cpu = 7;
+		while (delta) {
+			if (cpu_online(cpu)) {
+				cpu_down(cpu);
+				delta++;
+			}
+			cpu--;
+		}
+	}
+
+	max_num_cpu = input;
+
+	return count;
+}
+
 static struct global_attr enable_dm_hotplug =
 		__ATTR(enable_dm_hotplug, S_IRUGO | S_IWUSR,
 			show_enable_dm_hotplug, store_enable_dm_hotplug);
@@ -328,6 +421,20 @@ static struct global_attr dm_hotplug_stay_threshold =
 static struct global_attr dm_hotplug_delay =
 		__ATTR(dm_hotplug_delay, S_IRUGO | S_IWUSR,
 			show_dm_hotplug_delay, store_dm_hotplug_delay);
+
+static struct sysfs_attr cpucore_table =
+		__ATTR(cpucore_table, S_IRUGO,
+			show_cpucore_table, NULL);
+			
+static struct sysfs_attr cpucore_min_num_limit =
+		__ATTR(cpucore_min_num_limit, S_IRUGO | S_IWUSR,
+			show_cpucore_min_num_limit,
+			store_cpucore_min_num_limit);
+			
+static struct sysfs_attr cpucore_max_num_limit =
+		__ATTR(cpucore_max_num_limit, S_IRUGO | S_IWUSR,
+			show_cpucore_max_num_limit,
+			store_cpucore_max_num_limit);
 #endif
 
 static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
@@ -482,7 +589,7 @@ static int __ref __cpu_hotplug(bool out_flag, enum hotplug_cmd cmd)
 			goto blk_out;
 
 		if (cmd == CMD_BIG_OUT && !in_low_power_mode) {
-			for (i = setup_max_cpus - 1; i >= NR_CA7; i--) {
+			for (i = max_num_cpu - 1; i >= NR_CA7; i--) {
 				if (cpu_online(i)) {
 					ret = cpu_down(i);
 					if (ret)
@@ -505,7 +612,7 @@ static int __ref __cpu_hotplug(bool out_flag, enum hotplug_cmd cmd)
 				if (little_hotplug_in)
 					hotplug_out_limit = NR_CA7 - 2;
 
-				for (i = setup_max_cpus - 1; i > hotplug_out_limit; i--) {
+				for (i = max_num_cpu - 1; i > hotplug_out_limit; i--) {
 					if (cpu_online(i)) {
 						ret = cpu_down(i);
 						if (ret)
@@ -522,7 +629,7 @@ static int __ref __cpu_hotplug(bool out_flag, enum hotplug_cmd cmd)
 			if (in_low_power_mode)
 				goto blk_out;
 
-			for (i = NR_CA7; i < setup_max_cpus; i++) {
+			for (i = NR_CA7; i < max_num_cpu; i++) {
 				if (!cpu_online(i)) {
 					ret = cpu_up(i);
 					if (ret)
@@ -549,7 +656,7 @@ static int __ref __cpu_hotplug(bool out_flag, enum hotplug_cmd cmd)
 				}
 			} else {
 				if (lcd_is_on) {
-					for (i = NR_CA7; i < setup_max_cpus; i++) {
+					for (i = NR_CA7; i < max_num_cpu; i++) {
 						if (do_hotplug_out)
 							goto blk_out;
 
@@ -571,7 +678,7 @@ static int __ref __cpu_hotplug(bool out_flag, enum hotplug_cmd cmd)
 						}
 					}
 				} else {
-					for (i = 1; i < setup_max_cpus; i++) {
+					for (i = 1; i < max_num_cpu; i++) {
 						if (do_hotplug_out && i >= NR_CA7)
 							goto blk_out;
 
@@ -590,7 +697,7 @@ static int __ref __cpu_hotplug(bool out_flag, enum hotplug_cmd cmd)
 		if (do_disable_hotplug)
 			goto blk_out;
 
-		for (i = setup_max_cpus - 1; i > 0; i--) {
+		for (i = max_num_cpu - 1; i > 0; i--) {
 			if (cpu_online(i)) {
 				ret = cpu_down(i);
 				if (ret)
@@ -601,7 +708,7 @@ static int __ref __cpu_hotplug(bool out_flag, enum hotplug_cmd cmd)
 		if (in_suspend_prepared)
 			goto blk_out;
 
-		for (i = 1; i < setup_max_cpus; i++) {
+		for (i = 1; i < max_num_cpu; i++) {
 			if (!cpu_online(i)) {
 				ret = cpu_up(i);
 				if (ret)
@@ -1097,6 +1204,8 @@ const static struct file_operations cputime_fops = {
 static int __init dm_cpu_hotplug_init(void)
 {
 	int ret = 0;
+	min_num_cpu = 0;
+	max_num_cpu = NR_CPUS;
 #ifdef CONFIG_ARM_EXYNOS_MP_CPUFREQ
 	struct cpufreq_policy *policy;
 #endif
@@ -1148,6 +1257,27 @@ static int __init dm_cpu_hotplug_init(void)
 		pr_err("%s: failed to create dm_hotplug_delay sysfs interface\n",
 			__func__);
 		goto err_dm_hotplug_delay;
+	}
+
+	ret = sysfs_create_file(power_kobj, &cpucore_table.attr);
+	if (ret) {
+		pr_err("%s: failed to create cpucore_table sysfs interface\n",
+			__func__);
+		goto err_cpucore_table;
+	}
+
+	ret = sysfs_create_file(power_kobj, &cpucore_min_num_limit.attr);
+	if (ret) {
+		pr_err("%s: failed to create cpucore_min_num_limit sysfs interface\n",
+			__func__);
+		goto err_cpucore_min_num_limit;
+	}
+
+	ret = sysfs_create_file(power_kobj, &cpucore_max_num_limit.attr);
+	if (ret) {
+		pr_err("%s: failed to create cpucore_max_num_limit sysfs interface\n",
+			__func__);
+		goto err_cpucore_max_num_limit;
 	}
 #endif
 
@@ -1215,6 +1345,12 @@ err_policy:
 #ifdef CONFIG_PM
 	sysfs_remove_file(power_kobj, &dm_hotplug_delay.attr);
 err_dm_hotplug_delay:
+	sysfs_remove_file(power_kobj, &cpucore_table.attr);
+err_cpucore_table:
+	sysfs_remove_file(power_kobj, &cpucore_min_num_limit.attr);
+err_cpucore_min_num_limit:
+	sysfs_remove_file(power_kobj, &cpucore_max_num_limit.attr);
+err_cpucore_max_num_limit:
 	sysfs_remove_file(power_kobj, &dm_hotplug_stay_threshold.attr);
 err_dm_hotplug_stay_threshold:
 #if defined(CONFIG_SCHED_HMP)
