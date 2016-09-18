@@ -90,7 +90,7 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_TEMP_TRIPPING, 266},
 	{GPU_BOOST_MIN_LOCK, 0},
 	{GPU_BOOST_EGL_MIN_LOCK, 1300000},
-	{GPU_POWER_COEFF, 900}, /* all core on param */
+	{GPU_POWER_COEFF, 46}, /* all core on param */
 	{GPU_DVFS_TIME_INTERVAL, 5},
 	{GPU_DEFAULT_WAKEUP_LOCK, 1},
 	{GPU_BUS_DEVFREQ, 1},
@@ -100,7 +100,7 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_PERF_GATHERING, 0},
 	{GPU_HWCNT_GATHERING, 1},
 	{GPU_HWCNT_GPR, 1},
-	{GPU_RUNTIME_PM_DELAY_TIME, 30},
+	{GPU_RUNTIME_PM_DELAY_TIME, 50},
 	{GPU_DVFS_POLLING_TIME, 30},
 	{GPU_DEBUG_LEVEL, DVFS_WARNING},
 	{GPU_TRACE_LEVEL, TRACE_ALL},

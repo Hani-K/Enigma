@@ -2504,4 +2504,3 @@ module_exit(s6e3ha2_exit);
 
 MODULE_DESCRIPTION("MIPI-DSI S6E3HA2 (1440*2560) Panel Driver");
 MODULE_LICENSE("GPL");
-

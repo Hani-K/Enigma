@@ -110,8 +110,7 @@ void gpu_ipa_dvfs_calc_norm_utilisation(struct kbase_device *kbdev)
 	platform->norm_utilisation = (cur_utilisation * cur_freq)/max_freq;
 	/* Store what frequency was used for normalization */
 	platform->freq_for_normalisation = cur_freq;
-	platform->power = div_u64((u64)platform->ipa_power_coeff_gpu * cur_freq * cur_vol * cur_vol, 1000000);
-	/* adding an extra 0 for division in order to compensate for GPU coefficient unit change */
+	platform->power = div_u64((u64)platform->ipa_power_coeff_gpu * cur_freq * cur_vol * cur_vol, 100000);
 
 	gpu_ipa_trace_utilisation(kbdev);
 }
@@ -160,7 +159,7 @@ int kbase_platform_dvfs_freq_to_power(int freq)
 
 		if (level <= gpu_dvfs_get_level(platform->gpu_min_clock)) {
 			vol = platform->table[level].voltage / 10000;
-			power = div_u64((u64)platform->ipa_power_coeff_gpu * freq * vol * vol, 1000000);
+			power = div_u64((u64)platform->ipa_power_coeff_gpu * freq * vol * vol, 100000);
 		} else {
 			power = 0;
 		}
@@ -189,7 +188,7 @@ int kbase_platform_dvfs_power_to_freq(int power)
 	for (level = gpu_dvfs_get_level(platform->gpu_min_clock); level >= gpu_dvfs_get_level(platform->gpu_max_clock); level--) {
 		vol = platform->table[level].voltage / 10000;
 		freq = platform->table[level].clock;
-		_power = div_u64((u64)platform->ipa_power_coeff_gpu * freq * vol * vol, 1000000);
+		_power = div_u64((u64)platform->ipa_power_coeff_gpu * freq * vol * vol, 100000);
 		if ((int)_power >= power)
 			break;
 	}

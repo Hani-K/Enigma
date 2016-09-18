@@ -169,7 +169,6 @@ struct cpufreq_interactive_tunables {
 	int boostpulse_duration_val;
 	/* End time of boost pulse in ktime converted to usecs */
 	u64 boostpulse_endtime;
-	bool boosted;
 	/*
 	 * Max additional time to wait in idle, beyond timer_rate, at speeds
 	 * above minimum before wakeup to reduce speed, or -1 if unnecessary.
@@ -268,6 +267,9 @@ static inline cputime64_t get_cpu_idle_time(
 	unsigned int cpu,
 	cputime64_t *wall,
 	bool io_is_busy)
+
+#define DOWN_LOW_LOAD_THRESHOLD 5
+
 {
 	u64 idle_time = get_cpu_idle_time_us(cpu, wall);
 
@@ -660,6 +662,7 @@ static void exit_mode(struct cpufreq_interactive_tunables * tunables)
 }
 #endif
 
+#define MAX_LOCAL_LOAD 100
 static void cpufreq_interactive_timer(unsigned long data)
 {
 	u64 now;
@@ -674,6 +677,7 @@ static void cpufreq_interactive_timer(unsigned long data)
 	unsigned int loadadjfreq;
 	unsigned int index;
 	unsigned long flags;
+	bool boosted;
 #ifdef CONFIG_MODE_AUTO_CHANGE
 	unsigned int new_mode;
 #endif
@@ -714,7 +718,7 @@ static void cpufreq_interactive_timer(unsigned long data)
 	do_div(cputime_speedadj, delta_time);
 	loadadjfreq = (unsigned int)cputime_speedadj * 100;
 	cpu_load = loadadjfreq / pcpu->policy->cur;
-	tunables->boosted = tunables->boost_val || now < tunables->boostpulse_endtime;
+	boosted = tunables->boost_val || now < tunables->boostpulse_endtime;
 
 #ifdef CONFIG_PMU_COREMEM_RATIO
 	/* Get crypto load information from PMU */
@@ -734,41 +738,36 @@ static void cpufreq_interactive_timer(unsigned long data)
 	}
 #endif
 
-	if (cpu_load >= tunables->go_hispeed_load || tunables->boosted) {
-		if (pcpu->policy->cpu == 0 ||
-		    pcpu->policy->cpu == 4) {
-			if (pcpu->target_freq < tunables->hispeed_freq) {
-				new_freq = tunables->hispeed_freq;
-			} else {
-				new_freq = choose_freq(pcpu, loadadjfreq);
+	if (cpu_load >= tunables->go_hispeed_load || boosted) {
+		if (pcpu->policy->cur < tunables->hispeed_freq &&
+		    cpu_load <= MAX_LOCAL_LOAD) {
+			new_freq = tunables->hispeed_freq;
+		} else {
+			new_freq = choose_freq(pcpu, loadadjfreq);
 
-				if (new_freq < tunables->hispeed_freq)
-					new_freq = tunables->hispeed_freq;
-			}
+			if (new_freq < tunables->hispeed_freq)
+				new_freq = tunables->hispeed_freq;
 		}
-#if 0 /* for debugging purpose */
-		  else {
-			pr_info("%s: not boosting up cpu%d\n", __func__, pcpu->policy->cpu);
-#endif
+	} else if (cpu_load <= DOWN_LOW_LOAD_THRESHOLD) {
+		new_freq = pcpu->policy->cpuinfo.min_freq;
 	} else {
 		new_freq = choose_freq(pcpu, loadadjfreq);
-		if (new_freq > tunables->hispeed_freq &&
-				pcpu->target_freq < tunables->hispeed_freq)
+		if (new_freq > tunables->hispeed_freq && pcpu->target_freq < tunables->hispeed_freq)
 			new_freq = tunables->hispeed_freq;
+			
 	}
 
-	if (pcpu->target_freq >= tunables->hispeed_freq &&
-	    new_freq > pcpu->target_freq &&
+	if (cpu_load <= MAX_LOCAL_LOAD &&
+	    pcpu->policy->cur >= tunables->hispeed_freq &&
+	    new_freq > pcpu->policy->cur &&
 	    now - pcpu->hispeed_validate_time <
-	    freq_to_above_hispeed_delay(tunables, pcpu->target_freq)) {
+	    freq_to_above_hispeed_delay(tunables, pcpu->policy->cur)) {
 		trace_cpufreq_interactive_notyet(
 			data, cpu_load, pcpu->target_freq,
 			pcpu->policy->cur, new_freq);
 		spin_unlock_irqrestore(&pcpu->target_freq_lock, flags);
 		goto rearm;
 	}
-
-	pcpu->hispeed_validate_time = now;
 
 	if (cpufreq_frequency_table_target(pcpu->policy, pcpu->freq_table,
 					   new_freq, CPUFREQ_RELATION_L,
@@ -802,7 +801,7 @@ static void cpufreq_interactive_timer(unsigned long data)
 	 * (or the indefinite boost is turned off).
 	 */
 
-	if (!tunables->boosted || new_freq > tunables->hispeed_freq) {
+	if (!boosted || new_freq > tunables->hispeed_freq) {
 		pcpu->floor_freq = new_freq;
 		pcpu->floor_validate_time = now;
 	}
@@ -1021,6 +1020,7 @@ static int cpufreq_interactive_speedchange_task(void *data)
 		for_each_cpu(cpu, &tmp_mask) {
 			unsigned int j;
 			unsigned int max_freq = 0;
+			struct cpufreq_interactive_cpuinfo *pjcpu;
 
 			pcpu = &per_cpu(cpuinfo, cpu);
 
@@ -1032,17 +1032,23 @@ static int cpufreq_interactive_speedchange_task(void *data)
 			}
 
 			for_each_cpu(j, pcpu->policy->cpus) {
-				struct cpufreq_interactive_cpuinfo *pjcpu =
-					&per_cpu(cpuinfo, j);
+				pjcpu = &per_cpu(cpuinfo, j);
 
 				if (pjcpu->target_freq > max_freq)
 					max_freq = pjcpu->target_freq;
 			}
 
-			if (max_freq != pcpu->policy->cur)
+			if (max_freq != pcpu->policy->cur) {
+				u64 now;
 				__cpufreq_driver_target(pcpu->policy,
 							max_freq,
 							CPUFREQ_RELATION_H);
+				now = ktime_to_us(ktime_get());
+				for_each_cpu(j, pcpu->policy->cpus) {
+					pjcpu = &per_cpu(cpuinfo, j);
+					pjcpu->hispeed_validate_time = now;
+				}
+			}
 
 #if defined(CONFIG_CPU_THERMAL_IPA)
 			ipa_cpufreq_requested(pcpu->policy, max_freq);
@@ -1059,15 +1065,14 @@ static int cpufreq_interactive_speedchange_task(void *data)
 	return 0;
 }
 
-static void cpufreq_interactive_boost(const struct cpufreq_policy *policy, struct cpufreq_interactive_tunables *tunables)
+static void cpufreq_interactive_boost(const struct cpufreq_policy *policy)
 {
 	int i;
 	int anyboost = 0;
 	unsigned long flags[2];
 	struct cpufreq_interactive_cpuinfo *pcpu;
+	struct cpufreq_interactive_tunables *tunables;
 	struct cpumask boost_mask;
-
-	tunables->boosted = true;
 
 	spin_lock_irqsave(&speedchange_cpumask_lock, flags[0]);
 
@@ -1078,8 +1083,7 @@ static void cpufreq_interactive_boost(const struct cpufreq_policy *policy, struc
 
 	for_each_cpu(i, &boost_mask) {
 		pcpu = &per_cpu(cpuinfo, i);
-		if (tunables != pcpu->policy->governor_data)
-			continue;
+		tunables = pcpu->policy->governor_data;
 
 		spin_lock_irqsave(&pcpu->target_freq_lock, flags[1]);
 		if (pcpu->target_freq < tunables->hispeed_freq) {
@@ -1296,7 +1300,7 @@ static ssize_t store_above_hispeed_delay(
 	struct cpufreq_interactive_tunables *tunables,
 	const char *buf, size_t count)
 {
-	int ntokens;
+	int ntokens, i;
 	unsigned int *new_above_hispeed_delay = NULL;
 	unsigned long flags;
 #ifdef CONFIG_MODE_AUTO_CHANGE
@@ -1326,6 +1330,16 @@ static ssize_t store_above_hispeed_delay(
 	tunables->nabove_hispeed_delay = ntokens;
 #endif
 	spin_unlock_irqrestore(&tunables->above_hispeed_delay_lock, flags);
+
+	/* Make sure frequencies are in ascending order. */
+	for (i = 3; i < ntokens; i += 2) {
+		if (new_above_hispeed_delay[i] <=
+		    new_above_hispeed_delay[i - 2]) {
+			kfree(new_above_hispeed_delay);
+			return -EINVAL;
+		}
+	}
+
 	return count;
 
 }
@@ -1504,8 +1518,7 @@ static ssize_t store_boost(struct cpufreq_interactive_tunables *tunables,
 
 	if (tunables->boost_val) {
 		trace_cpufreq_interactive_boost("on");
-		if (!tunables->boosted)
-			cpufreq_interactive_boost(policy, tunables);
+		cpufreq_interactive_boost(policy);
 	} else {
 		tunables->boostpulse_endtime = ktime_to_us(ktime_get());
 		trace_cpufreq_interactive_unboost("off");
@@ -1529,8 +1542,7 @@ static ssize_t store_boostpulse(struct cpufreq_interactive_tunables *tunables,
 	tunables->boostpulse_endtime = ktime_to_us(ktime_get()) +
 		tunables->boostpulse_duration_val;
 	trace_cpufreq_interactive_boost("pulse");
-	if (!tunables->boosted)
-		cpufreq_interactive_boost(policy, tunables);
+	cpufreq_interactive_boost(policy);
 	return count;
 }
 
@@ -1953,11 +1965,11 @@ show_gov_pol_sys(region_time_in_state);
 #endif
 #define gov_sys_attr_rw(_name)						\
 static struct global_attr _name##_gov_sys =				\
-__ATTR(_name, 0660, show_##_name##_gov_sys, store_##_name##_gov_sys)
+__ATTR(_name, 0664, show_##_name##_gov_sys, store_##_name##_gov_sys)
 
 #define gov_pol_attr_rw(_name)						\
 static struct freq_attr _name##_gov_pol =				\
-__ATTR(_name, 0660, show_##_name##_gov_pol, store_##_name##_gov_pol)
+__ATTR(_name, 0664, show_##_name##_gov_pol, store_##_name##_gov_pol)
 
 #define gov_sys_pol_attr_rw(_name)					\
 	gov_sys_attr_rw(_name);						\
@@ -2491,12 +2503,8 @@ static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 		break;
 
 	case CPUFREQ_GOV_LIMITS:
-		if (policy->max < policy->cur)
-			__cpufreq_driver_target(policy,
-					policy->max, CPUFREQ_RELATION_H);
-		else if (policy->min > policy->cur)
-			__cpufreq_driver_target(policy,
-					policy->min, CPUFREQ_RELATION_L);
+		__cpufreq_driver_target(policy,
+				policy->cur, CPUFREQ_RELATION_L);
 		for_each_cpu(j, policy->cpus) {
 			pcpu = &per_cpu(cpuinfo, j);
 
