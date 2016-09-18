@@ -610,7 +610,7 @@ static int __ref __cpu_hotplug(bool out_flag, enum hotplug_cmd cmd)
 				}
 			} else {
 				if (little_hotplug_in)
-					hotplug_out_limit = NR_CA7 - 3;
+					hotplug_out_limit = NR_CA7 - 2;
 
 				for (i = max_num_cpu - 1; i > hotplug_out_limit; i--) {
 					if (cpu_online(i)) {
@@ -638,7 +638,7 @@ static int __ref __cpu_hotplug(bool out_flag, enum hotplug_cmd cmd)
 			}
 		} else {
 			if (cmd == CMD_LITTLE_ONE_IN) {
-				for (i = 1; i < NR_CA7 - 2; i++) {
+				for (i = 1; i < NR_CA7 - 1; i++) {
 					if (!cpu_online(i)) {
 						ret = cpu_up(i);
 						if (ret)
