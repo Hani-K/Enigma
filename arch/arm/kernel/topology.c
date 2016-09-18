@@ -71,7 +71,7 @@ struct cpu_efficiency {
  */
 struct cpu_efficiency table_efficiency[] = {
 #ifdef CONFIG_SOC_EXYNOS5433
-	{"arm,cortex-a15", 3891},
+	{"arm,cortex-a15", 3575},
 #else
  	{"arm,cortex-a15", 3891},
 #endif

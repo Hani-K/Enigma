@@ -57,8 +57,8 @@
 #endif
 
 #ifdef CONFIG_SOC_EXYNOS5433
-#define POWER_COEFF_15P		48 /* percore param */
-#define POWER_COEFF_7P		9 /* percore param */
+#define POWER_COEFF_15P		55 /* percore param */
+#define POWER_COEFF_7P		13 /* percore param */
 #endif
 
 static unsigned int KFC_MIN_FREQ = 400000;
