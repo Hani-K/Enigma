@@ -42,7 +42,7 @@ echo -n "Set build variables................................"
 export ARCH=arm
 export SUBARCH=arm
 export ccache=ccache
-# export CROSS_COMPILE=/home/serg/arm-eabi-4.9-cortex-a15-master/bin/arm-eabi-;
+# export CROSS_COMPILE=/home/serg/arm-eabi-4.9/bin/arm-eabi-;
 export CROSS_COMPILE=/home/serg/arm-eabi-6.0/bin/arm-eabi-;
 export KCONFIG_NOTIMESTAMP=true
 echo "Done"

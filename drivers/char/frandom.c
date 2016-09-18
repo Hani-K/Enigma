@@ -296,7 +296,6 @@ static void frandom_cleanup_module(void)
 	kfree(erandom_state);
 }
 
-
 static int frandom_init_module(void)
 {
 	int result;
@@ -407,3 +406,8 @@ error0:
 
 module_init(frandom_init_module);
 module_exit(frandom_cleanup_module);
+
+MODULE_AUTHOR("Eli Billauer <eli@billauer.co.il>");
+MODULE_DESCRIPTION("'char_random_frandom' - A fast random generator for "
+"general usage");
+MODULE_LICENSE("GPL");

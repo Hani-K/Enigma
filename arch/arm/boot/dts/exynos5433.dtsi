@@ -2051,7 +2051,7 @@
 				freq_clip_max_kfc = <1100000>;
 			};
 			throttle_tab_5 {
-				temp = <110>;
+				temp = <105>;
 				freq_clip_max = <800000>;
 				freq_clip_max_kfc = <400000>;
 			};

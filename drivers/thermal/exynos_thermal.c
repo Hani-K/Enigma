@@ -164,8 +164,10 @@ static struct pm_qos_request exynos_mif_thermal_little_max_qos;
 static unsigned int COLD_TEMP = 19;
 static unsigned int HOT_NORMAL_TEMP = 95;
 static unsigned int HOT_CRITICAL_TEMP = 110;
+
 static unsigned int MIF_TH_TEMP1 = 85;
 static unsigned int MIF_TH_TEMP2 = 95;
+
 static unsigned int GPU_TH_TEMP1 = 75;
 static unsigned int GPU_TH_TEMP2 = 80;
 static unsigned int GPU_TH_TEMP3 = 85;
@@ -175,8 +177,10 @@ static unsigned int GPU_TH_TEMP5 = 95;
 module_param_named(tmu_cpu_cold, COLD_TEMP, uint, S_IWUSR | S_IRUGO);
 module_param_named(tmu_cpu_normal, HOT_NORMAL_TEMP, uint, S_IWUSR | S_IRUGO);
 module_param_named(tmu_cpu_critical, HOT_CRITICAL_TEMP, uint, S_IWUSR | S_IRUGO);
+
 module_param_named(tmu_mif_normal, MIF_TH_TEMP1, uint, S_IWUSR | S_IRUGO);
 module_param_named(tmu_mif_hot, MIF_TH_TEMP2, uint, S_IWUSR | S_IRUGO);
+
 module_param_named(tmu_gpu_temp1, GPU_TH_TEMP1, uint, S_IWUSR | S_IRUGO);
 module_param_named(tmu_gpu_temp2, GPU_TH_TEMP2, uint, S_IWUSR | S_IRUGO);
 module_param_named(tmu_gpu_temp3, GPU_TH_TEMP3, uint, S_IWUSR | S_IRUGO);
