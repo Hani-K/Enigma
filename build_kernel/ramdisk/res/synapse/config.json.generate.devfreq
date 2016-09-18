@@ -2,7 +2,7 @@
 
 cat << CTAG
 {
-    name:Bus Voltage,
+    name:BUS VOLTAGE,
     elements:[
 	{ SPane:{ title:"Internal Bus voltage control",
 		description:" Voltage supplied to the internal auxiliary IP blocks, such as the hardware video decoders, the scaling blocks, the display controllers, and the MMC controllers."

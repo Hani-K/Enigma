@@ -26,11 +26,11 @@
 /*
  * The polling frequency depends on the capability of the processor. Default
  * polling frequency is 1000 times the transition latency of the processor. The
- * governor will work on any processor with transition latency <= 10ms, using
+ * governor will work on any processor with transition latency <= 10mS, using
  * appropriate sampling rate.
  *
- * For CPUs with transition latency > 10ms (mostly drivers with CPUFREQ_ETERNAL)
- * this governor will not work. All times here are in us (micro seconds).
+ * For CPUs with transition latency > 10mS (mostly drivers with CPUFREQ_ETERNAL)
+ * this governor will not work. All times here are in uS.
  */
 #define MIN_SAMPLING_RATE_RATIO			(2)
 #define LATENCY_MULTIPLIER			(1000)
@@ -137,10 +137,8 @@ struct cpu_dbs_common_info {
 	u64 prev_cpu_nice;
 	unsigned int prev_load;
 	/*
-	 * Used to keep track of load in the previous interval. However, when
-	 * explicitly set to zero, it is used as a flag to ensure that we copy
-	 * the previous load to the current interval only once, upon the first
-	 * wake-up from idle.
+	 * Flag to ensure that we copy the previous load only once, upon the
+	 * first wake-up from idle.
 	 */
 	bool copy_prev_load;
 	struct cpufreq_policy *cur_policy;
@@ -171,7 +169,7 @@ struct cs_cpu_dbs_info_s {
 	unsigned int enable:1;
 };
 
-/* Per policy Governors sysfs tunables */
+/* Per policy Governers sysfs tunables */
 struct od_dbs_tuners {
 	unsigned int ignore_nice_load;
 	unsigned int sampling_rate;
@@ -190,7 +188,7 @@ struct cs_dbs_tuners {
 	unsigned int freq_step;
 };
 
-/* Common Governor data across policies */
+/* Common Governer data across policies */
 struct dbs_data;
 struct common_dbs_data {
 	/* Common across governors */
@@ -200,10 +198,7 @@ struct common_dbs_data {
 	struct attribute_group *attr_group_gov_sys; /* one governor - system */
 	struct attribute_group *attr_group_gov_pol; /* one governor - policy */
 
-	/*
-	 * Common data for platforms that don't set
-	 * CPUFREQ_HAVE_GOVERNOR_PER_POLICY
-	 */
+	/* Common data for platforms that don't set have_governor_per_policy */
 	struct dbs_data *gdbs_data;
 
 	struct cpu_dbs_common_info *(*get_cpu_cdbs)(int cpu);
@@ -217,7 +212,7 @@ struct common_dbs_data {
 	void *gov_ops;
 };
 
-/* Governor Per policy data */
+/* Governer Per policy data */
 struct dbs_data {
 	struct common_dbs_data *cdata;
 	unsigned int min_sampling_rate;
@@ -267,8 +262,6 @@ static ssize_t show_sampling_rate_min_gov_pol				\
 }
 
 u64 get_cpu_idle_time(unsigned int cpu, u64 *wall, int io_busy);
-extern struct mutex cpufreq_governor_lock;
-
 void dbs_check_cpu(struct dbs_data *dbs_data, int cpu);
 bool need_load_eval(struct cpu_dbs_common_info *cdbs,
 		unsigned int sampling_rate);

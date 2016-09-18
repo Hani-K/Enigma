@@ -5,6 +5,15 @@ cat << CTAG
     name:"GOV",
     elements:[
 	{ SPane:{
+		title:"Interactive governor speed mod ",
+		description:""
+        }},
+	{ SOptionList:{
+                default:`echo $(/res/synapse/actions/network interactive_mode)`,
+                action:"network interactive_mode",
+                values:[Turbo, Standart,]
+        }},
+	{ SPane:{
 		title:"CPU Governor",
 		description:" The CPU governor determines how the CPU behaves in response to changes in workload."
         }},
@@ -13,26 +22,112 @@ cat << CTAG
 	}},
 	{ SOptionList:{
 		title:"Current A53 little core governor",
-		default:`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`,
-		action:"generic /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor",
-		values:[`while read values; do busybox printf "%s, \n" $values; done < sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors`]
-	}},
-	{ SDescription:{
-		description:""
-	}},
-	{ SPane:{
-		title:"Governor A53 little core tunables",
-		description:" The various configuration items which are governor-dependent."
+                default:`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`,
+                action:"governor /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor",
+                values:[
+`
+                        for GOVERNOR in \`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors\` ; do
+                                echo "\"$GOVERNOR\","
+                        done
+`
+                ],
+		notify:[
+			{
+				on:APPLY,
+				do:[ REFRESH, CANCEL ],
+				to:"/sys/devices/system/cpu/cpufreq"
+			},
+			{
+				on:REFRESH,
+				do:REFRESH,
+				to:"/sys/devices/system/cpu/cpufreq"
+			}
+		]
         }},
 	{ SDescription:{
 		description:""
 	}},
+        { SOptionList:{
+		title:"Current A57 big core governor",
+                default:`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor`,
+                action:"governor /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor",
+                values:[
+`
+                        for GOVERNOR in \`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_available_governors\` ; do
+                                echo "\"$GOVERNOR\","
+                        done
+`
+                ],
+		notify:[
+			{
+				on:APPLY,
+				do:[ REFRESH, CANCEL ],
+				to:"/sys/devices/system/cpu/cpufreq"
+			},
+			{
+				on:REFRESH,
+				do:REFRESH,
+				to:"/sys/devices/system/cpu/cpufreq"
+			}
+		]
+        }},
 	{ SDescription:{
-		description:" Note: If you have just changed Governor, restart Synapse to refresh the tunables below!"
+		description:""
+	}},
+	{ SPane:{
+		title:"Governor tunables for legacy types",
+		description:"The various configuration items which are governor-dependent."
 	}},
 	{ SDescription:{
 		description:""
 	}},
+
+	{ STreeDescriptor:{
+		path:"/sys/devices/system/cpu/cpufreq",
+		generic: {
+			directory: {
+				STreeDescriptor:{
+					generic: {
+						directory: {},
+						element: {
+							SGeneric: { title:"@NAME" }
+						}
+					},
+					matched: {
+						elements: [
+							{ "sampling_rate" : {
+								SSeekBar: {
+									title:"Sampling rate",
+									description:" The sampling rate controls the rate in which the governor polls for frequency changes.",
+									min:0, max:150000, step:5000, unit:" ms"
+								}
+							}}
+						]
+					},
+					exclude: [
+						"boostpulse",
+						"cpu_util",
+						"sampling_rate_min"
+					]
+				}
+			}
+		},
+		exclude: [
+          "all_time_in_state",
+			"mp-cpufreq",
+          "stats"
+		]
+	}},
+	{ SDescription:{
+		description:""
+    }},
+	{ SPane:{
+		title:"Governor tunables for A53 core",
+       description:"The various configuration items which are governor-dependent."
+    }},
+	{ SDescription:{
+		description:""
+    }},
 	{ STreeDescriptor:{
 		path:"/sys/devices/system/cpu/cpu0/cpufreq",
 		generic: {
@@ -49,8 +144,8 @@ cat << CTAG
 							{ "sampling_rate" : {
 								SSeekBar: {
 									title:"Sampling rate",
-									description:" The sampling rate controls the frequency in which the governor polls for frequency changes.",
-									min:10000, max:100000, step:5000, unit:" ms"
+									description:" The sampling rate controls the rate in which the governor polls for frequency changes.",
+									min:0, max:150000, step:5000, unit:" ms"
 								}
 							}}
 						]
@@ -58,7 +153,9 @@ cat << CTAG
 					exclude: [
 						"boostpulse",
 						"cpu_util",
-						"mode"
+                    				"mode",
+						"enforced_mode",
+						"sampling_rate_min"
 					]
 				}
 			}
@@ -69,7 +166,6 @@ cat << CTAG
 			"cpuinfo_max_freq",
 			"cpuinfo_min_freq",
 			"cpuinfo_transition_latency",
-			"mode",
 			"related_cpus",
 			"scaling_available_governors",
 			"scaling_cur_freq",
@@ -82,30 +178,15 @@ cat << CTAG
 		]
 	}},
 	{ SDescription:{
-		description:" "
-	}},
-	{ SOptionList:{
-		title:"Current A57 big core governor",
-		default:`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor`,
-		action:"generic /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor",
-		values:[`while read values; do busybox printf "%s, \n" $values; done < sys/devices/system/cpu/cpu4/cpufreq/scaling_available_governors`]
-	}},
-	{ SDescription:{
 		description:""
 	}},
 	{ SPane:{
-		title:"Governor A57 big core tunables",
-		description:" The various configuration items which are governor-dependent."
-        }},
+		title:"Governor tunables for A57 core",
+       description:"The various configuration items which are governor-dependent."
+    }},
 	{ SDescription:{
 		description:""
-	}},
-	{ SDescription:{
-		description:" Note: If you have just changed Governor, restart Synapse to refresh the tunables below!"
-	}},
-	{ SDescription:{
-		description:""
-	}},
+    }},
 	{ STreeDescriptor:{
 		path:"/sys/devices/system/cpu/cpu4/cpufreq",
 		generic: {
@@ -122,8 +203,8 @@ cat << CTAG
 							{ "sampling_rate" : {
 								SSeekBar: {
 									title:"Sampling rate",
-									description:" The sampling rate controls the frequency in which the governor polls for frequency changes.",
-									min:10000, max:100000, step:5000, unit:" ms"
+									description:" The sampling rate controls the rate in which the governor polls for frequency changes.",
+									min:0, max:150000, step:5000, unit:" ms"
 								}
 							}}
 						]
@@ -131,7 +212,9 @@ cat << CTAG
 					exclude: [
 						"boostpulse",
 						"cpu_util",
-						"mode"
+                    				"mode",
+						"enforced_mode",
+						"sampling_rate_min"
 					]
 				}
 			}
@@ -142,7 +225,6 @@ cat << CTAG
 			"cpuinfo_max_freq",
 			"cpuinfo_min_freq",
 			"cpuinfo_transition_latency",
-			"mode",
 			"related_cpus",
 			"scaling_available_governors",
 			"scaling_cur_freq",
@@ -154,9 +236,9 @@ cat << CTAG
                         "stats"
 		]
 	}},
-	{ SDescription:{
-		description:" "
-	}},
+    { SDescription:{
+        description:" "
+    }}    
     ]
 }
 CTAG

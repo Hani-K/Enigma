@@ -15,68 +15,14 @@ cat << CTAG
 		description:""
 	}},
 	{ SPane:{
-		title:"KSM"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SCheckBox:{
-		description:" Enabling Kernel SamePage Merging (KSM) will merge some memory to give a slight performance bump, but at the cost of small CPU power which could have an impact on battery life. Default is Disabled.",
-		label:"Enable or Disable KSM",
-		default:`cat /sys/kernel/mm/ksm/run`,
-		action:"generic /sys/kernel/mm/ksm/run"
-    	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SLiveLabel:{
-                title:"KSM stats",
-		description:" Memory samepage merging is not a quick process, so stats may initially show 0 MB.",
-		refresh:3000,
-		action:"live KSMStats"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SSeekBar:{
-		title:"Pages to Scan",
-		description:" Default is 250.",
-		unit:" pages",
-		step:10,
-		min:0,
-		max:500,
-		default:`cat /sys/kernel/mm/ksm/pages_to_scan`,
-		action:"generic /sys/kernel/mm/ksm/pages_to_scan"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SSeekBar:{
-		title:"Scan Delay Interval",
-		description:" Default is 1500.",
-		unit:" ms",
-		step:10,
-		min:0,
-		max:1500,
-		default:`cat /sys/kernel/mm/ksm/sleep_millisecs`,
-		action:"generic /sys/kernel/mm/ksm/sleep_millisecs"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SCheckBox:{
-		description:" Enabling Deferred Timer will prevent the KSM thread waking up CPU to carry out KSM activities, thus gaining on battery while compromising slightly on memory that could have been saved.",
-		label:"Enable or Disable Deferred Timer",
-       	 	default:`cat /sys/kernel/mm/ksm/deferred_timer`,
-		action:"generic /sys/kernel/mm/ksm/deferred_timer"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ STitleBar:{
-		title:"Virtual Memory",
-		description:" Tune the operation of the VM subsystem of the Linux kernel and the writeout of dirty data to disk."
-	}},
+                title:"Virtual NAND swap",
+                description:"The disk size represents the amount of data allowed to fit into the ramdisk"
+        }},
+        { SOptionList:{
+                default:`echo $(/res/synapse/actions/swaps vnswap0)`,
+                action:"swaps vnswap0",
+                values:[Disabled, Enabled,]
+        }},
 	{ SDescription:{
 		description:" "
 	}},
@@ -86,9 +32,6 @@ cat << CTAG
 		min:0, max:50, unit:" %", step:1,
 		default:`cat /sys/module/zswap/parameters/max_pool_percent`,
                 action:"generic /sys/module/zswap/parameters/max_pool_percent"
-	}},
-	{ SDescription:{
-		description:" "
 	}},
     	{ SSeekBar:{
         	title:"dirty_background_ratio",
@@ -139,14 +82,12 @@ cat << CTAG
 		description:" "
 	}},
 	{ SSeekBar:{
-		title:"swappiness",
-		description:" A low value means the kernel will try to avoid swapping as much as possible where a higher value instead will make the kernel aggressively try to use swap space. Default is 130.",
-		max:200,
-		min:0,
-		step:10,
-		default:`cat /proc/sys/vm/swappiness`,
-		action:"generic /proc/sys/vm/swappiness",
-	}},
+                title:"Virtual machine swappiness",
+                description:"A low value means the kernel will try to avoid swapping as much as possible where a higher value instead will make the kernel aggressively try to use swap space.",
+                min:0, max:200, unit:"%", step:1,
+                default:`cat /proc/sys/vm/swappiness`,
+                action:"generic /proc/sys/vm/swappiness"
+        }},
 	{ SDescription:{
 		description:" "
 	}},
@@ -160,6 +101,17 @@ cat << CTAG
 		default:`cat /proc/sys/vm/vfs_cache_pressure`,
 		action:"generic /proc/sys/vm/vfs_cache_pressure"
     	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SOptionList:{
+		title:"Drop Caches (Clear VFS Cache After Boot)",
+		description:" This option will force rebuild of file system cache based on actual app usage rather than boot/startup processes. NOTE: This process can take from 1-2 minutes (Enable for better file system read/write performance).",
+		default:1,
+		action:"dropcaches /res/synapse/SkyHigh/dropcaches_prof",
+		values:{ 0:"Disabled", 1:"Enabled"
+		}
+	}},
 	{ SDescription:{
 		description:" "
 	}},

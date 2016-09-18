@@ -64,7 +64,7 @@ cat << CTAG
                 default:`cat /sys/devices/14ac0000.mali/min_clock`,
                 unit:"MHz",
                 action:"generic /sys/devices/14ac0000.mali/min_clock",
-                values:[160, 266, 350, 420, 500, 550, 600,]
+                values:[160, 266, 350, 420, 500,]
 }},
         { SDescription:{
                 description:""
@@ -111,7 +111,7 @@ cat << CTAG
                 max:100, min:0, unit:"ms", step:1,
                 action:"generic /sys/devices/14ac0000.mali/highspeed_delay",
 }},
-        { SDescription:{
+	{ SDescription:{
                 description:""
 	}},
 	{ SPane:{

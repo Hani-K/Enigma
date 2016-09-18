@@ -27,6 +27,31 @@ cat << CTAG
 		description:""
 	}},
 	{ SPane:{
+                title:"SensorHub Wakelock",
+                description:" The SensorHub Wakelock Is One Of The Biggest Wake Sources. Disable For Better Deep Sleep And Less Awake Time, Enable For Stock Behavior. Disabling May Break Things! If You Have Weird Issues, Re Enable It Before Reporting!"
+        }},
+        { SOptionList:{
+                default:`cat /sys/module/wakeup/parameters/enable_sensorhub_wl`,
+                action:"generic /sys/module/wakeup/parameters/enable_sensorhub_wl",
+                values:{
+                        "N":"Disabled SensorHub Wakelock",
+                        "Y":"Enabled SensorHub Wakelock(Default)"
+                },
+        }},
+	{ SDescription:{
+		description:""
+	}},
+	{ SOptionList:{
+		title:"FSync On/Off toggle",
+		description:"Enabling/Disabling FSync. Disable for better file system performance at the risk of data lost when phone crashes. Default Enabled.",
+		default:`$BB cat /sys/module/sync/parameters/fsync_enabled`,
+		action:"generic /sys/module/sync/parameters/fsync_enabled",
+		values:{N:"Disabled FSync", Y:"Enabled FSync(Default)"}
+	}},
+      	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
 		title:"Kernel Entropy"
       	}},
 	{ SDescription:{
@@ -48,76 +73,6 @@ cat << CTAG
 		max:2048, min:64, step:64,
 		default:`cat /proc/sys/kernel/random/write_wakeup_threshold`,
 		action:"generic /proc/sys/kernel/random/write_wakeup_threshold"
-	}},
-	{ SPane:{
-		title:"PowerSuspend",
-		description:" PowerSuspend driver is a replacement for the early_suspend/late_resume driver. Hybrid uses autosleep & display panel hook. Default is Hybrid."
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SOptionList:{
-		default:`echo $(/res/synapse/actions/suspend powersuspend)`,
-		action:"suspend powersuspend",
-		values:[Autosleep_hook, Userspace_trigger, DisplayPanel_hook, Hybrid_hook,]
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SSeekBar:{
-		title:"PowerSuspend State",
-		description:" Kernel power management driver when screen is off. Better battery savings if enabled. Note: You can only change this setting if PowerSuspend Mode is set to Userspace_trigger.",
-		min:0,
-		max:1,
-		step:1,
-		default:`cat /sys/kernel/power_suspend/power_suspend_state`,
-		action:"suspend_state /sys/kernel/power_suspend/power_suspend_state"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SButton:{
-		label:"PowerSuspend version",
-		action:"show susp"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SPane:{
-		title:"Dynamic FSync",
-		description:" Requires PowerSuspend driver ENABLED"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SCheckBox:{
-		description:" While screen is on file sync is disabled, when screen is off a file sync is called to flush all outstanding writes and restore file sync operation as normal. Increases speed, but a possible decrease in data integrity, also could create reboot and kernel panic. Default is Enabled.",
-		label:"Enable Dynamic FSync",
-		default:`cat /sys/kernel/dyn_fsync/Dyn_fsync_active`,
-		action:"generic /sys/kernel/dyn_fsync/Dyn_fsync_active"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SButton:{
-		label:"Dynamic FSync version",
-		action:"show fsync"
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SPane:{
-		title:"Power-Efficient Workqueues"
-      	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SOptionList:{
-		title:"Power-Efficient WQ",
-		description:"Enabling Power-Efficient Workqueues will help to reduce power consumption at the cost of slight performance overhead. By enabling this, PE workqueues are used for unbound scheduled work to save load on sibling CPU cores and queuing work on CPU 0.",
-		default:`$BB cat /sys/module/workqueue/parameters/power_efficient`,
-		action:"generic /sys/module/workqueue/parameters/power_efficient",
-		values:{N:"Disabled", Y:"Enabled"}
 	}},
       	{ SDescription:{
 		description:""

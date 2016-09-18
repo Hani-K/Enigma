@@ -7,12 +7,6 @@ cat << CTAG
 	{ SPane:{
 		title:"Log Creation"
 	}},
-	{ SCheckBox:{
-		description:" Enable or Disable Android logger. You must enable to save the latest logcat output to file. Default is OFF.",
-		label:"Enable logger_mode",
-		default:`cat /sys/kernel/logger_mode/logger_mode`,
-		action:"generic /sys/kernel/logger_mode/logger_mode"
-	}},
 	{ SDescription:{
 		description:""
 	}},

@@ -43,97 +43,369 @@ cat << CTAG
 		action:"live batthealth"
 	}},
 	{ SDescription:{
-		description:" "
-	}},
-	{ SPane:{
-		title:"Enable/Disable FastCharge"
-	}},
-	{ SDescription:{
-		description:" Default is Disabled."
-	}},
-	{ SDescription:{
-		description:" Enabled_FastCharge will substitute AC to USB."
-	}},
-	{ SDescription:{
-		description:" Enabled_FastCharge_with_Custom_Levels will use custom mA as user set below."
-	}},
-	{ SDescription:{
-		description:" "
-	}},
-	{ SOptionList:{
-		default:`echo $(/res/synapse/actions/battery fastcharge)`,
-		action:"battery fastcharge",
-		values:[Disabled, Enabled_FastCharge, Enabled_FastCharge_with_Custom_Levels,]
-	}},
-	{ SDescription:{
-		description:""
-	}},
-        { SCheckBox:{
-                description:" Use MTP during fast charge. Default is Enabled.",
-                label:"Use MTP",
-		default:`cat /sys/kernel/fast_charge/use_mtp_during_fast_charge`,
-                action:"generic /sys/kernel/fast_charge/use_mtp_during_fast_charge"
-	}},
-	{ SDescription:{
-		description:""
-	}},
-        { SCheckBox:{
-                description:" Use Samsung screen ON charging limit whilst charging. Default is Enabled.",
-                label:"Screen ON current limit",
-		default:`cat /sys/kernel/fast_charge/screen_on_current_limit`,
-                action:"generic /sys/kernel/fast_charge/screen_on_current_limit"
-	}},
-	{ SDescription:{
 		description:""
 	}},
 	{ SPane:{
-		title:"Custom_Levels settings",
-		description:" Only possible when FastCharge Custom_Levels is selected."
+		title:"HV Power Supplies",
+		description:" High Voltage current limits applied to designated dedicated chargers and corresponding cables."
 	}},
 	{ SDescription:{
 		description:""
 	}},
 	{ SSeekBar:{
-		title:"Set AC Custom Charge Level",
-		description:" Default is 2100.",
-		unit:" mA",
-		default:`cat /sys/kernel/fast_charge/ac_charge_level`,
-		action:"generic /sys/kernel/fast_charge/ac_charge_level",
-		values:[`while read values; do busybox printf "%s, \n" $values; done < /sys/kernel/fast_charge/ac_levels`]
+		title:"HV Prepare Mains Input Current",
+		description:"",
+		min:800, max:2000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/hv_prep_input`,
+                action:"generic /sys/devices/battery.30/hv_prep_input"
 	}},
 	{ SDescription:{
 		description:""
 	}},
 	{ SSeekBar:{
-		title:"Set USB Custom Charge Level",
-		description:" Default is 460.",
-		unit:" mA",
-		default:`cat /sys/kernel/fast_charge/usb_charge_level`,
-		action:"generic /sys/kernel/fast_charge/usb_charge_level",
-		values:[`while read values; do busybox printf "%s, \n" $values; done < /sys/kernel/fast_charge/usb_levels`]
+		title:"HV Prepare Mains Charge Current",
+		description:"",
+		min:800, max:2000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/hv_prep_charge`,
+                action:"generic /sys/devices/battery.30/hv_prep_charge"
 	}},
 	{ SDescription:{
 		description:""
 	}},
 	{ SSeekBar:{
-		title:"Set WIRELESS Custom Charge Level",
-		description:" Default is 650.",
-		unit:" mA",
-		default:`cat /sys/kernel/fast_charge/wireless_charge_level`,
-		action:"generic /sys/kernel/fast_charge/wireless_charge_level",
-		values:[`while read values; do busybox printf "%s, \n" $values; done < /sys/kernel/fast_charge/wireless_levels`]
+		title:"HV Input Current",
+		description:"",
+		min:400, max:3000, unit:" mA", step:1,
+		default:`cat /sys/devices/battery.30/hv_input`,
+                action:"generic /sys/devices/battery.30/hv_input"
 	}},
 	{ SDescription:{
 		description:""
 	}},
-	{ SCheckBox:{
-		description:" If disabled you allow anything up to 2.1A/h to be used as AC / USB / Wireless custom current.",
-		label:"Un-check to disable - ON YOUR OWN RISK",
-		default:`cat /sys/kernel/fast_charge/failsafe`,
-		action:"generic /sys/kernel/fast_charge/failsafe"
+	{ SSeekBar:{
+		title:"HV Charge Current",
+		description:" High Voltage charge current supplied to battery during charging.\n",
+		min:1000, max:3150, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/hv_charge`,
+                action:"generic /sys/devices/battery.30/hv_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"AC/Mains",
+		description:" AC or mains current limits applied to designated dedicated chargers and corresponding cables."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"AC/Mains Input Current",
+		description:"",
+		min:400, max:3150, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/ac_input`,
+                action:"generic /sys/devices/battery.30/ac_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"AC/Mains Charge Current",
+		description:" AC or mains charge current supplied to battery during charging.\n",
+		min:400, max:3150, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/ac_charge`,
+                action:"generic /sys/devices/battery.30/ac_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SDescription:{
+		description:" Input and charging currents are limited to certain maximas if the screen is turned on to avoid elevated heat generation. Normal charging limits are applied when the screen is off."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"AC/Mains Input Current (screen-on)",
+		description:"",
+		min:400, max:3150, unit:" mA", step:1,
+		default:`cat /sys/devices/battery.30/so_limit_input`,
+                action:"generic /sys/devices/battery.30/so_limit_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"AC/Mains Charge Current (screen-on)",
+		description:" AC or mains charge current supplied to battery during charging whilst screen is on.\n",
+		min:400, max:3150, unit:" mA", step:1,
+		default:`cat /sys/devices/battery.30/so_limit_charge`,
+                action:"generic /sys/devices/battery.30/so_limit_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{ 
+		title:"Standard Downstream Port",
+		description:" Standard Downstream Port current limits applied on plain and compliant USB data connectivity ports."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"SDP Input Current",
+		description:"",
+		min:400, max:1000, unit:" mA", step:20,
+		default:`cat /sys/devices/battery.30/sdp_input`,
+                action:"generic /sys/devices/battery.30/sdp_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"SDP Charge Current",
+		description:" NOTE: SDP charge limit serves as a global minimum for ALL charge currents except MHL currents, overriding their respective value if they are inferior!\n",
+		min:400, max:1000, unit:" mA", step:20,
+		default:`cat /sys/devices/battery.30/sdp_charge`,
+                action:"generic /sys/devices/battery.30/sdp_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{ 
+		title:"Dedicated Charging Port",
+		description:" Dedicated Charging Port current limits applied when detection of a standalone charger happens, or if a USB connector with shorted D+ and D- pins is attached."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"DCP Input Current",
+		description:"",
+		min:400, max:2000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/dcp_input`,
+                action:"generic /sys/devices/battery.30/dcp_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"DCP Charge Current",
+		description:"",
+		min:400, max:2000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/dcp_charge`,
+                action:"generic /sys/devices/battery.30/dcp_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{ 
+		title:"Charging Downstream Port",
+		description:" Charging Downstream Port current limits applied on BCS 1.1 special charging USB data connectivity ports."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"CDP Input Current",
+		description:"",
+		min:400, max:1500, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/cdp_input`,
+                action:"generic /sys/devices/battery.30/cdp_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"CDP Charge Current",
+		description:"",
+		min:400, max:1500, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/cdp_charge`,
+                action:"generic /sys/devices/battery.30/cdp_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{ 
+		title:"Accessory Charging Adapter",
+		description:" Accessory Charging Adapter current limits applied to various dedicated USB accessories."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"ACA Input Current",
+		description:"",
+		min:100, max:1000, unit:" mA", step:20,
+		default:`cat /sys/devices/battery.30/aca_input`,
+                action:"generic /sys/devices/battery.30/aca_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"ACA Charge Current",
+		description:"",
+		min:100, max:1000, unit:" mA", step:20,
+		default:`cat /sys/devices/battery.30/aca_charge`,
+                action:"generic /sys/devices/battery.30/aca_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{ 
+		title:"MHL power",
+		description:" Mobile High-Definition Link power sources."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"500 mA MHL Class Input Current",
+		description:"",
+		min:300, max:1000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_500_input`,
+                action:"generic /sys/devices/battery.30/mhl_500_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"500 mA MHL Class Charge Current",
+		description:"",
+		min:300, max:1000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_500_charge`,
+                action:"generic /sys/devices/battery.30/mhl_500_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"500 mA MHL Class Input Current",
+		description:"",
+		min:300, max:1000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_500_input`,
+                action:"generic /sys/devices/battery.30/mhl_500_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"500 mA MHL Class Charge Current",
+		description:"",
+		min:300, max:1000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_500_charge`,
+                action:"generic /sys/devices/battery.30/mhl_500_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"900 mA MHL Class Input Current",
+		description:"",
+		min:300, max:1500, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_900_input`,
+                action:"generic /sys/devices/battery.30/mhl_900_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"900 mA MHL Class Charge Current",
+		description:"",
+		min:300, max:1500, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_900_charge`,
+                action:"generic /sys/devices/battery.30/mhl_900_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"1500 mA MHL Class Input Current",
+		description:"",
+		min:300, max:2000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_1500_input`,
+                action:"generic /sys/devices/battery.30/mhl_1500_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"1500 mA MHL Class Charge Current",
+		description:"",
+		min:300, max:2000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_1500_charge`,
+                action:"generic /sys/devices/battery.30/mhl_1500_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"100 mA MHL USB Class Input Current",
+		description:"",
+		min:80, max:500, unit:" mA", step:20,
+		default:`cat /sys/devices/battery.30/mhl_usb100_input`,
+                action:"generic /sys/devices/battery.30/mhl_usb100_input"
 	}},
 	{ SDescription:{
 		description:" "
+	}},
+	{ SSeekBar:{
+		title:"100 mA MHL USB Class Charge Current",
+		description:"",
+		min:80, max:500, unit:" mA", step:20,
+		default:`cat /sys/devices/battery.30/mhl_usb100_charge`,
+                action:"generic /sys/devices/battery.30/mhl_usb100_charge"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SSeekBar:{
+		title:"USB powered MHL Adapter Input Current",
+		description:"",
+		min:300, max:2000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_usb_input`,
+                action:"generic /sys/devices/battery.30/mhl_usb_input"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SSeekBar:{
+		title:"USB powered MHL Adapter Charge Current",
+		description:"",
+		min:300, max:2000, unit:" mA", step:50,
+		default:`cat /sys/devices/battery.30/mhl_usb_charge`,
+                action:"generic /sys/devices/battery.30/mhl_usb_charge"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SPane:{ 
+		title:"Wireless power",
+		description:" Wireless power sources."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"Wireless Input Current",
+		description:"",
+		min:800, max:1500, unit:" mA", step:20,
+		default:`cat /sys/devices/battery.30/wc_input`,
+                action:"generic /sys/devices/battery.30/wc_input"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"Wireless Charge Current",
+		description:"",
+		min:800, max:1500, unit:" mA", step:20,
+		default:`cat /sys/devices/battery.30/wc_charge`,
+                action:"generic /sys/devices/battery.30/wc_charge"
+	}},
+	{ SDescription:{
+		description:""
 	}},
 	{ SPane:{
 		title:"Battery Scaling Calibration",

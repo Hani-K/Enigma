@@ -5,41 +5,46 @@ cat << CTAG
     name:IO,
     elements:[
     	{ SPane:{
-		title:"I/O Schedulers",
-		description:" Set the active I/O elevator algorithm. The I/O Scheduler decides how to prioritize and handle I/O requests. More info: <a href='http://timos.me/tm/wiki/ioscheduler'>Wiki</a>"
-    	}},
-	{ SDescription:{
-		description:""
+		title:"I/O schedulers",
+		description:"Set the active I/O elevator algorithm. The scheduler decides how to handle I/O requests and how to handle them."
+        }},
+	{ SOptionList:{
+		title:"Internal storage scheduler",
+		default:`echo $(/res/synapse/actions/bracket-option /sys/block/mmcblk0/queue/scheduler)`,
+		action:"bracket-option /sys/block/mmcblk0/queue/scheduler",
+		values:[
+`
+			for IOSCHED in \`cat /sys/block/mmcblk0/queue/scheduler | sed -e 's/\]//;s/\[//'\`; do
+			  echo "\"$IOSCHED\","
+			done
+`
+		]
 	}},
 	{ SOptionList:{
-		title:"Storage scheduler",
-		default:`cat /sys/block/mmcblk0/queue/scheduler | busybox awk 'NR>1{print $1}' RS=[ FS=]`,
-		action:"ioset scheduler",
-		values:[`while read values; do busybox printf "%s, \n" $values | busybox tr -d '[]'; done < /sys/block/mmcblk0/queue/scheduler`],
-			notify:[
-				{
-					on:APPLY,
-					do:[ REFRESH, CANCEL ],
-					to:"/sys/block/mmcblk0/queue/iosched"
-				},
-				{
-					on:REFRESH,
-					do:REFRESH,
-					to:"/sys/block/mmcblk0/queue/iosched"
-				}
-			]
-	}},
-	{ SDescription:{
-		description:" "
+		title:"SD card scheduler",
+		default:`echo $(/res/synapse/actions/bracket-option /sys/block/mmcblk1/queue/scheduler)`,
+		action:"bracket-option /sys/block/mmcblk1/queue/scheduler",
+		values:[
+`
+			for IOSCHED in \`cat /sys/block/mmcblk1/queue/scheduler | sed -e 's/\]//;s/\[//'\`; do
+			  echo "\"$IOSCHED\","
+			done
+`
+		]
 	}},
 	{ SSeekBar:{
-		title:"Storage Read-Ahead",
-		max:2048,
-		min:64,
-		unit:" KB",
-		step:64,
+		title:"Internal storage read-ahead",
+		description:"The read-ahead value on the internal phone memory.",
+		max:2048, min:128, unit:"kB", step:128,
 		default:`cat /sys/block/mmcblk0/queue/read_ahead_kb`,
-		action:"ioset queue read_ahead_kb"
+                action:"generic /sys/block/mmcblk0/queue/read_ahead_kb"
+	}},
+	{ SSeekBar:{
+		title:"SD card read-ahead",
+		description:"The read-ahead value on the external SD card.",
+		max:2048, min:128, unit:"kB", step:128,
+		default:`cat /sys/block/mmcblk1/queue/read_ahead_kb`,
+                action:"generic /sys/block/mmcblk1/queue/read_ahead_kb"
 	}},
 	{ SDescription:{
 		description:" "

@@ -99,9 +99,6 @@
 # audio
 /dev/seiren               0660   system     audio
 
-# Secure MEM driver
-/dev/s5p-smem             0660   drm        drmrpc
-
 # sensor sysfs properties
 /sys/devices/virtual/input/input*	poll_delay	0660	system	radio
 /sys/devices/virtual/input/input*	enable		0660	system	radio
@@ -123,9 +120,6 @@
 /dev/block/mmcblk0p14     0660   system     radio
 /dev/umts*                0660   system     radio
 
-# MIF
-/dev/block/mmcblk0p13     0660   system     radio
-/dev/umts*                0660   system     radio
 # DNT
 /dev/block/mmcblk0p15     0660   system     system
 

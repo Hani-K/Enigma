@@ -6,8 +6,8 @@
 #define BOOSTER_DEFAULT_HEAD_TIME	130	/* msec */
 #define BOOSTER_DEFAULT_TAIL_TIME	500	/* msec */
 
-#define BOOSTER_DEBUG_HEAD_TIME		500 	/* msec */
-#define BOOSTER_DEBUG_TAIL_TIME		1000 	/* msec */
+#define BOOSTER_DEBUG_HEAD_TIME		500 /* msec */
+#define BOOSTER_DEBUG_TAIL_TIME		1000 /* msec */
 
 /* Booster levels are used as below comment.
  * 0	: OFF
@@ -22,7 +22,11 @@ enum booster_level {
 	BOOSTER_LEVEL0 = 0,
 	BOOSTER_LEVEL1,
 	BOOSTER_LEVEL2,
-	BOOSTER_LEVEL2_CHG,
+	BOOSTER_LEVEL3,
+	BOOSTER_LEVEL4,
+	BOOSTER_LEVEL5,
+	BOOSTER_LEVEL9 = 9,
+	BOOSTER_LEVEL9_CHG,
 	BOOSTER_LEVEL_MAX,
 };
 
@@ -31,10 +35,10 @@ enum booster_level {
  * If you want to add booster device, add it this after PEN type
  */
 enum booster_device_type {
-	BOOSTER_DEVICE_KEY,
-	BOOSTER_DEVICE_TOUCHKEY,
 	BOOSTER_DEVICE_TOUCH,
 	BOOSTER_DEVICE_PEN,
+	BOOSTER_DEVICE_KEY,
+	BOOSTER_DEVICE_TOUCHKEY,
 	BOOSTER_DEVICE_MAX,
 	BOOSTER_DEVICE_NOT_DEFINED,
 };

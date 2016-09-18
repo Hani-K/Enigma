@@ -20,8 +20,6 @@
 #include <linux/iio/buffer.h>
 #include <linux/iio/types.h>
 
-extern void sensor_prox_report(unsigned int detected);
-
 /*************************************************************************/
 /* SSP Kernel -> HAL input evnet function                                */
 /*************************************************************************/
@@ -443,13 +441,11 @@ void report_prox_data(struct ssp_data *data, struct sensor_value *proxdata)
 	ssp_dbg("[SSP] Proximity Sensor Detect : %u, raw : %u\n",
 		proxdata->prox[0], proxdata->prox[1]);
 
-	sensor_prox_report(proxdata->prox[0]);
-
 	data->buf[PROXIMITY_SENSOR].prox[0] = proxdata->prox[0];
 	data->buf[PROXIMITY_SENSOR].prox[1] = proxdata->prox[1];
 
-	input_report_abs(data->prox_input_dev, ABS_DISTANCE,
-		(!proxdata->prox[0]));
+	input_report_rel(data->prox_input_dev, REL_DIAL,
+		(!proxdata->prox[0]) + 1);
 	input_sync(data->prox_input_dev);
 
 	wake_lock_timeout(&data->ssp_wake_lock, 3 * HZ);
@@ -979,8 +975,7 @@ int initialize_input_dev(struct ssp_data *data)
 		goto err_initialize_proximity_input_dev;
 
 	data->prox_input_dev->name = "proximity_sensor";
-	input_set_capability(data->prox_input_dev, EV_ABS, ABS_DISTANCE);
-	input_set_abs_params(data->prox_input_dev, ABS_DISTANCE, 0, 1, 0, 0);
+	input_set_capability(data->prox_input_dev, EV_REL, REL_DIAL);
 	iRet = input_register_device(data->prox_input_dev);
 	if (iRet < 0) {
 		input_free_device(data->prox_input_dev);

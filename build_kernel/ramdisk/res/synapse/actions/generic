@@ -1,11 +1,11 @@
-BB=/sbin/busybox;
+if [ -f $1 ];then
+	if [[ ! -z $2 ]]; then
+		echo $2 > $1
+	fi
 
-if [ -f $1 ]; then
-	if [[ ! -z "$2" ]]; then
-		$BB echo "$2" > $1 2> /dev/null;
-	fi;
-
-	$BB echo "`$BB cat $1`";
+	echo `cat $1`
 else
-	$BB echo "0";
-fi;
+	case $1 in
+	/sys/block/mmcblk1/queue/read_ahead_kb)		echo "256" ;;
+	esac
+fi

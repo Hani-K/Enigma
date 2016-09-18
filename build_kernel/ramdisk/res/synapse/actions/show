@@ -11,6 +11,12 @@ fast)
   echo `cat /sys/kernel/fast_charge/info`
   ;;
 asv)
-  echo `cat /sys/kernel/debug/asv_group`
+  #echo `cat /sys/kernel/debug/asv_group|grep group`
+  STATE="";
+  cat /sys/kernel/debug/asv_group|grep group > /data/data/asvstat
+  while read GROUP D1 D2 D3 NUM ; do
+      STATE="$STATE $GROUP : $NUM @n";
+  done < /data/data/asvstat
+  $BB echo "$STATE";
   ;;
 esac

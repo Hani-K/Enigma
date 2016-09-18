@@ -15,12 +15,13 @@ cat << CTAG
 		description:"Values: from 0 (Lowest) to 15 (Highest). The higher the ASV, the higher frequencies your device can run and lower voltages"
 	}},
 	{ SLiveLabel:{
+		title:"ASV Group",
 		refresh:10000,
 		action:"show asv"
 	}},
         { SLiveLabel:{
 		title:"Sensor tempteratures",
-                description:" Temperature sensor data as read from the A57 (4-7) cores. The A53 (0-3) cores do not have dedicated sensors.",
+                description:" Temperature sensor data Exynos5433: Sensor type of each sub-block: S0-EAGLE0 temp, S1-EAGLE1 temp, S2-G3D temp, S3-KFC temp, S4-ISP temp.",
                 refresh:500,
                 action:"echo \$(echo \$(cat /sys/devices/10060000.tmu/curr_temp | tr , \"\\n\") | { read S0 S1 S2 S3 S4; echo \"S0: \${S0%?}°C@nS1: \${S1%?}°C@nS2: \${S2%?}°C@nS3: \${S3%?}°C@nS4: \${S4%?}°C\"; })"
         }},

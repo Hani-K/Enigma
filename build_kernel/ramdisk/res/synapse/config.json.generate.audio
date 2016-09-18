@@ -2,7 +2,7 @@
 
 cat << CTAG
 {
-    name:Audio,
+    name:AUDIO,
     elements:[
 	{ SPane:{ 
 		title:"Headphone Amplification",

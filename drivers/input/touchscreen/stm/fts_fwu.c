@@ -484,9 +484,9 @@ int fts_fw_update_on_probe(struct fts_ts_info *info)
 	if (fts_skip_firmware_update(info, fw_data))
 		goto done;
 
-	if ((info->fw_main_version_of_ic != info->fw_main_version_of_bin)
-		|| ((info->config_version_of_ic != info->config_version_of_bin))
-		|| ((info->fw_version_of_ic != info->fw_version_of_bin)))
+	if ((info->fw_main_version_of_ic < info->fw_main_version_of_bin)
+		|| ((info->config_version_of_ic < info->config_version_of_bin))
+		|| ((info->fw_version_of_ic < info->fw_version_of_bin)))
 	{
 		retval = fts_fw_updater(info, fw_data);
 	}

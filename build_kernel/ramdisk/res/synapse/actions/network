@@ -171,4 +171,87 @@ gpu_gov)
     echo Booster
   fi
   ;;
+
+hmp_packing)
+  P=/res/synapse/SkyHigh/hmp_packing
+  if [ ! -z $2 ]; then
+  if [ $2 == Disabled ]; then
+    echo "Disabled" > $P
+    echo "0" > /sys/kernel/hmp/packing_enable
+  elif [ $2 == Enabled ]; then
+    echo "Enabled" > $P
+  elif [ $2 == Auto ]; then
+  echo "Auto" > $P
+  fi; fi
+  copy=`cat $P`
+  if [ $copy == Disabled ]; then
+    echo Disabled
+  elif [ $copy == Enabled ]; then
+    echo Enabled
+  elif [ $copy == Auto ]; then
+    echo Auto
+  fi
+  ;;
+big_number)
+  P=/res/synapse/SkyHigh/max_big_number
+  P2=/res/synapse/SkyHigh/max_core_number
+  if [ ! -z $2 ]; then
+  if [ $2 == 0 ]; then
+    echo "0" > $P
+    echo "4" > /sys/power/cpucore_max_num_limit
+    echo "4" > $P2
+  elif [ $2 == 1 ]; then
+    echo "1" > $P
+    echo "5" > /sys/power/cpucore_max_num_limit
+    echo "5" > $P2
+  elif [ $2 == 2]; then
+    echo "2" > $P
+    echo "6" > /sys/power/cpucore_max_num_limit
+    echo "6" > $P2
+  elif [ $2 == 3]; then
+    echo "3" > $P
+    echo "7" > /sys/power/cpucore_max_num_limit
+    echo "7" > $P2
+  elif [ $2 == 4]; then
+    echo "4" > $P
+    echo "8" > /sys/power/cpucore_max_num_limit
+    echo "8" > $P2
+  fi; fi
+  copy=`cat $P`
+  if [ $copy == 0 ]; then
+    echo 0
+  elif [ $copy == 1 ]; then
+    echo 1
+  elif [ $copy == 2 ]; then
+    echo 2
+  elif [ $copy == 3 ]; then
+    echo 3
+  elif [ $copy == 4 ]; then
+    echo 4
+  fi
+  ;;
+interactive_mode)
+  P=/res/synapse/SkyHigh/interactive_mode
+  if [ ! -z $2 ]; then
+  if [ $2 == Turbo ]; then
+    echo "Turbo" > $P
+    echo "1" > /sys/devices/system/cpu/cpu0/cpufreq/interactive/enforced_mode
+    echo "1" > /sys/devices/system/cpu/cpu4/cpufreq/interactive/enforced_mode
+    echo "1" > /sys/devices/system/cpu/cpu0/cpufreq/interactive/mode
+    echo "1" > /sys/devices/system/cpu/cpu4/cpufreq/interactive/mode
+  elif [ $2 == Standart ]; then
+    echo "Standart" > $P
+    echo "0" > /sys/devices/system/cpu/cpu0/cpufreq/interactive/enforced_mode
+    echo "0" > /sys/devices/system/cpu/cpu4/cpufreq/interactive/enforced_mode
+    echo "0" > /sys/devices/system/cpu/cpu0/cpufreq/interactive/mode
+    echo "0" > /sys/devices/system/cpu/cpu4/cpufreq/interactive/mode
+  fi; fi
+  copy=`cat $P`
+  if [ $copy == Turbo ]; then
+    echo Turbo
+  elif [ $copy == Standart ]; then
+    echo Standart
+  fi
+  ;;
+
 esac

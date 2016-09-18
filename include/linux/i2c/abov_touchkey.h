@@ -21,16 +21,6 @@
 #define ABOV_TK_NAME "abov-touchkey"
 #define ABOV_ID 0x40
 
-/* Model define */
-#if defined(CONFIG_SEC_A5_PROJECT) || defined(CONFIG_SEC_A5_EUR_PROJECT) || defined(CONFIG_SEC_A53G_EUR_PROJECT)
-#ifdef CONFIG_SEC_FACTORY
-#define LED_TWINKLE_BOOTING
-#endif
-
-#else /* default */
-
-#endif
-
 struct abov_touchkey_platform_data {
 	unsigned long irq_flag;
 	int gpio_en;
@@ -40,17 +30,13 @@ struct abov_touchkey_platform_data {
 	int gpio_rst;
 	int gpio_tkey_led_en;
 	int gpio_seperated;
-	int sub_det;
 	struct regulator *vdd_io_vreg;
 	struct regulator *avdd_vreg;
-	struct regulator *dvdd_vreg;
 	void (*input_event) (void *data);
-	int (*power) (void *, bool on);
-	int (*keyled) (bool on);
-	char *fw_path;
-	u8 fw_checksum_h;
-	u8 fw_checksum_l;
-	bool boot_on_ldo;
+	int (*power) (struct abov_touchkey_platform_data *pdata, bool on);
+	int (*keyled) (struct abov_touchkey_platform_data *pdata, bool on);
+	const char *regulator_ic;
+	const char *regulator_led;
 };
 
 #endif /* LINUX_ABOV_TOUCHKEY_H */

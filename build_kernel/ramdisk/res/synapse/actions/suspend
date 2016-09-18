@@ -22,4 +22,26 @@ powersuspend)
     echo Hybrid_hook
   fi
   ;;
+dt2w)
+  P=/res/synapse/SkyHigh/dt2w
+  if [ ! -z $2 ]; then
+  if [ $2 == DT2W_OFF ]; then
+    echo "DT2W_OFF" > $P
+    echo "0" > /sys/android_touch/doubletap2wake
+  elif [ $2 == DT2W_ON_Lower_Half_Screen ]; then
+    echo "DT2W_ON_Lower_Half_Screen" > $P
+    echo "1" > /sys/android_touch/doubletap2wake
+  elif [ $2 == DT2W_ON_Center_Screen ]; then
+    echo "DT2W_ON_Center_Screen" > $P
+    echo "2" > /sys/android_touch/doubletap2wake
+  fi; fi
+  copy=`cat $P`
+  if [ $copy == DT2W_OFF ]; then
+    echo DT2W_OFF
+  elif [ $copy == DT2W_ON_Lower_Half_Screen ]; then
+    echo DT2W_ON_Lower_Half_Screen
+  elif [ $copy == DT2W_ON_Center_Screen ]; then
+    echo DT2W_ON_Center_Screen
+  fi
+  ;;
 esac
