@@ -2093,6 +2093,7 @@ unsigned long nr_iowait_cpu(int cpu)
 	return atomic_read(&this->nr_iowait);
 }
 
+#ifdef CONFIG_LAZYPLUG
 unsigned long avg_nr_running(void)
 {
 	unsigned long i, sum = 0;
@@ -2120,7 +2121,6 @@ unsigned long avg_nr_running(void)
 	return sum;
 }
 
-#ifdef CONFIG_LAZYPLUG
 unsigned long avg_cpu_nr_running(unsigned int cpu)
 {
 	unsigned int seqcnt, ave_nr_running;

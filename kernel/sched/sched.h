@@ -414,12 +414,12 @@ struct rq {
 	unsigned long last_sched_tick;
 #endif
 	int skip_clock_update;
-
+#ifdef CONFIG_LAZYPLUG
 	/* time-based average load */
 	u64 nr_last_stamp;
 	unsigned int ave_nr_running;
 	seqcount_t ave_seqcnt;
-
+#endif
 	/* capture load from *all* tasks on this cpu: */
 	struct load_weight load;
 	unsigned long nr_load_updates;
@@ -1087,6 +1087,7 @@ static inline u64 steal_ticks(u64 steal)
 }
 #endif
 
+#ifdef CONFIG_LAZYPLUG
 /* 27 ~= 134217728ns = 134.2ms
  * 26 ~=  67108864ns =  67.1ms
  * 25 ~=  33554432ns =  33.5ms
@@ -1112,14 +1113,19 @@ static inline unsigned int do_avg_nr_running(struct rq *rq)
 			
 	return ave_nr_running;
 }
+#endif
 
 static inline void inc_nr_running(struct rq *rq)
 {
+#ifdef CONFIG_LAZYPLUG
 	write_seqcount_begin(&rq->ave_seqcnt);
 	rq->ave_nr_running = do_avg_nr_running(rq);
 	rq->nr_last_stamp = rq->clock_task;
+#endif
 	rq->nr_running++;
+#ifdef CONFIG_LAZYPLUG
 	write_seqcount_end(&rq->ave_seqcnt);
+#endif
 
 #ifdef CONFIG_NO_HZ_FULL
 	if (rq->nr_running == 2) {
@@ -1134,11 +1140,15 @@ static inline void inc_nr_running(struct rq *rq)
 
 static inline void dec_nr_running(struct rq *rq)
 {
+#ifdef CONFIG_LAZYPLUG
 	write_seqcount_begin(&rq->ave_seqcnt);
 	rq->ave_nr_running = do_avg_nr_running(rq);
 	rq->nr_last_stamp = rq->clock_task;
+#endif
 	rq->nr_running--;
+#ifdef CONFIG_LAZYPLUG
 	write_seqcount_end(&rq->ave_seqcnt);
+#endif
 }
 
 static inline void rq_last_tick_reset(struct rq *rq)

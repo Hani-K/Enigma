@@ -67,7 +67,7 @@ static bool do_disable_hotplug = false;
 static bool do_hotplug_out = false;
 static int big_hotpluged = 0;
 static int little_hotplug_in = 0;
-#define DEFAULT_NR_RUN_THRESHD	200
+#define DEFAULT_NR_RUN_THRESHD	5
 #define DEFAULT_NR_RUN_RANGE	2
 static unsigned int nr_running_threshold = DEFAULT_NR_RUN_THRESHD;
 static unsigned int nr_running_range = DEFAULT_NR_RUN_RANGE;
@@ -777,33 +777,20 @@ void event_hotplug_in(void)
 }
 #endif
 
-static int __ref exynos_dm_hotplug_notifier(struct notifier_block *notifier,
+static int exynos_dm_hotplug_notifier(struct notifier_block *notifier,
 					unsigned long pm_event, void *v)
 {
-	int i, j;
-
 	switch (pm_event) {
 	case PM_SUSPEND_PREPARE:
 		mutex_lock(&thread_lock);
 		in_suspend_prepared = true;
-
-		if (!dynamic_hotplug(CMD_NORMAL))
-			prev_cmd = CMD_NORMAL;
-
+		if (!dynamic_hotplug(CMD_LOW_POWER))
+			prev_cmd = CMD_LOW_POWER;
 		exynos_dm_hotplug_disable();
 		if (dm_hotplug_task) {
 			kthread_stop(dm_hotplug_task);
 			dm_hotplug_task = NULL;
 		}
-
-		for (i = 4; i < 11; i++) {
-			j = i;
-			if (j >= 8) j = 11 - j;
-			if (!cpu_online(j)) {
-				cpu_up(j);
-			}
-		}
-
 		mutex_unlock(&thread_lock);
 		break;
 
@@ -860,7 +847,7 @@ static struct notifier_block exynos_dm_hotplug_reboot_nb = {
 #ifdef CONFIG_SCHED_HMP
 static void update_nr_running_count(void)
 {
-	cur_nr_running = (avg_nr_running() * 100) >> FSHIFT;
+	cur_nr_running = nr_running();
 
 	if (cur_nr_running >= nr_running_threshold) {
 		if (nr_running_count < nr_running_range)

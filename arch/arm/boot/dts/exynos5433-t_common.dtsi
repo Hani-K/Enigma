@@ -1721,7 +1721,7 @@
 			/* for level	:	1_Head */
 			input_booster,cpu_freqs = <1200000>;
 			input_booster,hmp_boost = <1>;
-			input_booster,kfc_freqs = <0>;
+			input_booster,kfc_freqs = <1200000>;
 			input_booster,mif_freqs = <0>;
 			input_booster,int_freqs = <0>;
 
@@ -1740,13 +1740,13 @@
 			/* for level	:	1_Head */
 			input_booster,cpu_freqs = <1200000>;
 			input_booster,hmp_boost = <1>;
-			input_booster,kfc_freqs = <0>;
+			input_booster,kfc_freqs = <1200000>;
 			input_booster,mif_freqs = <0>;
 			input_booster,int_freqs = <0>;
 
 			/* Time table */
 			input_booster,head_times = <0>;
-			input_booster,tail_times = <200>;
+			input_booster,tail_times = <500>;
 			input_booster,phase_times = <0>;
 		};
 		booster_key@3 {
@@ -1757,9 +1757,9 @@
 
 			/* Frequency table */
 			/* for level	:	1_Head, 2_Head, 2_Tail */
-			input_booster,cpu_freqs = <1200000 1200000 0>;
+			input_booster,cpu_freqs = <1200000 1000000 0>;
 			input_booster,hmp_boost = <1 1 0>;
-			input_booster,kfc_freqs = <800000 800000 1300000>;
+			input_booster,kfc_freqs = <1000000 1000000 1000000>;
 			input_booster,mif_freqs = <0 0 0>;
 			input_booster,int_freqs = <0 0 0>;
 
@@ -1772,20 +1772,20 @@
 			input_booster,label = "MULTITOUCH";
 			input_booster,type = <3>;	/* BOOSTER_DEVICE_MULTITOUCH */
 
-			input_booster,levels = <1 2>;
+			input_booster,levels = <1 2 3>;
 
 			/* Frequency table */
-			/* for level	:	1_Head 2_Tail*/
-			input_booster,cpu_freqs = <1300000 0>;
-			input_booster,hmp_boost = <1 1>;
-			input_booster,kfc_freqs = <1200000 800000>;
-			input_booster,mif_freqs = <0 0>;
-			input_booster,int_freqs = <0 0>;
+			/* for level	:	1_Head, 2_Head, 2_Tail */
+			input_booster,cpu_freqs = <1200000 1000000 0>;
+			input_booster,hmp_boost = <1 1 0>;
+			input_booster,kfc_freqs = <1000000 1000000 1000000>;
+			input_booster,mif_freqs = <0 0 0>;
+			input_booster,int_freqs = <0 0 0>;
 
 			/* Time table */
-			input_booster,head_times = <1000 1000>;
-			input_booster,tail_times = <500 500>;
-			input_booster,phase_times = <0 0>;
+			input_booster,head_times = <130 130 0>;
+			input_booster,tail_times = <500 500 0>;
+			input_booster,phase_times = <0 0 0>;
 		};
 		booster_key@5 {
 			input_booster,label = "KEYBOARD";
@@ -1848,20 +1848,20 @@
 			input_booster,label = "PEN HOVER";
 			input_booster,type = <7>;	/* BOOSTER_DEVICE_MOUSE */
 
-			input_booster,levels = <1 2>;
+			input_booster,levels = <1 2 3>;
 
 			/* Frequency table */
-			/* for level	:	1_Head 2_Tail*/
-			input_booster,cpu_freqs = <1200000 0>;
-			input_booster,hmp_boost = <1 0>;
-			input_booster,kfc_freqs = <800000 1300000>;
-			input_booster,mif_freqs = <0 0>;
-			input_booster,int_freqs = <0 0>;
+			/* for level	:	1_Head, 2_Head, 2_Tail */
+			input_booster,cpu_freqs = <1200000 1000000 0>;
+			input_booster,hmp_boost = <1 1 0>;
+			input_booster,kfc_freqs = <1000000 1000000 1000000>;
+			input_booster,mif_freqs = <0 0 0>;
+			input_booster,int_freqs = <0 0 0>;
 
 			/* Time table */
-			input_booster,head_times = <130 130>;
-			input_booster,tail_times = <500 500>;
-			input_booster,phase_times = <0 0>;
+			input_booster,head_times = <130 130 0>;
+			input_booster,tail_times = <500 500 0>;
+			input_booster,phase_times = <0 0 0>;
 		}; /* Input Booster - */
 		/* If you need to add new key type, add it this position */
 	};
