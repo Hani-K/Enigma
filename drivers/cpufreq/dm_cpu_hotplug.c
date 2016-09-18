@@ -777,20 +777,33 @@ void event_hotplug_in(void)
 }
 #endif
 
-static int exynos_dm_hotplug_notifier(struct notifier_block *notifier,
+static int __ref exynos_dm_hotplug_notifier(struct notifier_block *notifier,
 					unsigned long pm_event, void *v)
 {
+	int i, j;
+
 	switch (pm_event) {
 	case PM_SUSPEND_PREPARE:
 		mutex_lock(&thread_lock);
 		in_suspend_prepared = true;
-		if (!dynamic_hotplug(CMD_LOW_POWER))
-			prev_cmd = CMD_LOW_POWER;
+
+		if (!dynamic_hotplug(CMD_NORMAL))
+			prev_cmd = CMD_NORMAL;
+
 		exynos_dm_hotplug_disable();
 		if (dm_hotplug_task) {
 			kthread_stop(dm_hotplug_task);
 			dm_hotplug_task = NULL;
 		}
+
+		for (i = 4; i < 11; i++) {
+			j = i;
+			if (j >= 8) j = 11 - j;
+			if (!cpu_online(j)) {
+				cpu_up(j);
+			}
+		}
+
 		mutex_unlock(&thread_lock);
 		break;
 
@@ -845,7 +858,6 @@ static struct notifier_block exynos_dm_hotplug_reboot_nb = {
 };
 
 #ifdef CONFIG_SCHED_HMP
-extern unsigned long avg_nr_running(void);
 static void update_nr_running_count(void)
 {
 	cur_nr_running = (avg_nr_running() * 100) >> FSHIFT;
@@ -888,6 +900,10 @@ static enum hotplug_cmd diagnose_condition(void)
 
 #if defined(CONFIG_CPU_FREQ_GOV_INTERACTIVE)
 	normal_min_freq = cpufreq_interactive_get_hispeed_freq(0);
+	if (!normal_min_freq)
+		normal_min_freq = NORMALMIN_FREQ;
+#elif defined(CONFIG_CPU_FREQ_GOV_CAFACTIVE)
+	normal_min_freq = cpufreq_cafactive_get_hispeed_freq(0);
 	if (!normal_min_freq)
 		normal_min_freq = NORMALMIN_FREQ;
 #else

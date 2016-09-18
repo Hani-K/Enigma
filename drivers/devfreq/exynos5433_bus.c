@@ -3962,7 +3962,7 @@ static void exynos5_devfreq_thermal_monitor(struct work_struct *work)
 		thermal_work->polling_period = 300;
 #else
 		timingaref_value = RATE_ONE;
-		thermal_work->polling_period = 1000;
+		thermal_work->polling_period = 500;
 #endif /* CONFIG_ARM_EXYNOS5433_BUS_DEVFREQ_THERMAL_POLICY_3_4 */
 		break;
 	case 4:
@@ -3979,7 +3979,7 @@ static void exynos5_devfreq_thermal_monitor(struct work_struct *work)
 		if (throttling) {
 			pr_info("so it need MIF throttling!\n");
 			/* signal to FIMC-IS */
-			exynos_mif_call_notifier(devfreq_mif_opp_list[MIF_LV5].freq);
+			exynos_mif_call_notifier(devfreq_mif_opp_list[MIF_LV1].freq);
 		}
 		break;
 	case 6:
@@ -3991,7 +3991,7 @@ static void exynos5_devfreq_thermal_monitor(struct work_struct *work)
 	}
 
 	if (throttling && use_mif_throttling) {
-		max_freq = devfreq_mif_opp_list[MIF_LV5].freq;
+		max_freq = devfreq_mif_opp_list[MIF_LV1].freq;
 	} else {
 		max_freq = data_mif->cal_qos_max;
 	}

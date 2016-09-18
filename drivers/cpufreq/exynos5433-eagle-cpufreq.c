@@ -174,8 +174,8 @@ static int exynos5433_bus_table_CA15[CPUFREQ_LEVEL_END_CA15] = {
 	543000,		/* 1.2 GHz */
 	413000,		/* 1.1 GHz */
 	413000,		/* 1.0 GHz */
-	413000,		/* 900 MHz */
-	413000,		/* 800 MHz */
+	0,		/* 900 MHz */
+	0,		/* 800 MHz */
 	0,		/* 700 MHz */
 	0,		/* 600 MHz */
 	0,		/* 500 MHz */
@@ -394,7 +394,7 @@ static void __init set_volt_table_CA15(void)
 	table_ver =  cal_get_table_ver();
 	switch (table_ver) {
 	case 0 :
-		max_support_idx_CA15 = L11;	/* 1.4 GHz */
+		max_support_idx_CA15 = L13;	/* 1.2 GHz */
 		break;
 	case 1 :
 	case 4 :
@@ -408,12 +408,12 @@ static void __init set_volt_table_CA15(void)
 	}
 
 	if (is_max_limit_sample() == 1)
-		max_support_idx_CA15 = L6;      /* 1.9 GHz */
+		max_support_idx_CA15 = L8;      /* 1.7 GHz */
 #else
 	max_support_idx_CA15 = L13;	/* 1.2 GHz */
 #endif
 
-	min_support_idx_CA15 = L23;	/* 200 MHz */
+	min_support_idx_CA15 = L18;	/* 700 MHz */
 
 	pr_info("CPUFREQ of CA15 max_freq : L%d %u khz\n", max_support_idx_CA15,
 		exynos5433_freq_table_CA15[max_support_idx_CA15].frequency);

@@ -1835,12 +1835,12 @@ int gpu_create_sysfs_file(struct device *dev)
 	}
 
 	if (device_create_file(dev, &dev_attr_dvfs_max_lock_)) {
-		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "couldn't create sysfs file [dvfs_max_lock_]\n");
+		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "couldn't create sysfs file [dvfs_max_lock]\n");
 		goto out;
 	}
 
 	if (device_create_file(dev, &dev_attr_dvfs_min_lock_)) {
-		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "couldn't create sysfs file [dvfs_min_lock_]\n");
+		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "couldn't create sysfs file [dvfs_min_lock]\n");
 		goto out;
 	}
 	
@@ -1883,7 +1883,7 @@ int gpu_create_sysfs_file(struct device *dev)
 		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "couldn't create sysfs file [min_clock]\n");
 		goto out;
 	}
-	
+
 	if (device_create_file(dev, &dev_attr_throttling1)) {
 		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "couldn't create sysfs file [throttling1]\n");
 		goto out;
@@ -1908,7 +1908,7 @@ int gpu_create_sysfs_file(struct device *dev)
 		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "couldn't create sysfs file [tripping]\n");
 		goto out;
 	}	
-
+	
 	if (device_create_file(dev, &dev_attr_tmu)) {
 		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "couldn't create sysfs file [tmu]\n");
 		goto out;

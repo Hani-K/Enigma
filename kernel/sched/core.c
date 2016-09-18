@@ -2120,6 +2120,7 @@ unsigned long avg_nr_running(void)
 	return sum;
 }
 
+#ifdef CONFIG_LAZYPLUG
 unsigned long avg_cpu_nr_running(unsigned int cpu)
 {
 	unsigned int seqcnt, ave_nr_running;
@@ -2141,6 +2142,7 @@ unsigned long avg_cpu_nr_running(unsigned int cpu)
 
 	return ave_nr_running;
 }
+#endif
 
 unsigned long this_cpu_load(void)
 {

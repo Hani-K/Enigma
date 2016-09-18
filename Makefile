@@ -381,6 +381,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-unused -Wno-maybe-uninitialized \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
+		   -Wno-sequence-point \
 		   -Wno-error=declaration-after-statement \
 		   -std=gnu89 -Wno-discarded-array-qualifiers -Wno-logical-not-parentheses -Wno-array-bounds -Wno-switch
 

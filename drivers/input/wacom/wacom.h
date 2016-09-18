@@ -25,7 +25,9 @@
 #include <linux/input/input_booster.h>
 #endif
 
-#ifdef CONFIG_EPEN_WACOM_W9012
+#ifdef CONFIG_EPEN_WACOM_W9014
+#define WACOM_FW_SIZE 131092
+#elif defined(CONFIG_EPEN_WACOM_W9012)
 #define WACOM_FW_SIZE 131072
 #elif defined(CONFIG_EPEN_WACOM_G9PM)
 #define WACOM_FW_SIZE 61440
@@ -35,6 +37,9 @@
 #else
 #define WACOM_FW_SIZE 32768
 #endif
+
+#define WACOM_NORMAL_MODE	false
+#define WACOM_BOOT_MODE		true
 
 /*Wacom Command*/
 #define COM_COORD_NUM	12
@@ -48,10 +53,16 @@
 #define COM_SAMPLERATE_40  0x33
 #define COM_SAMPLERATE_80  0x32
 #define COM_SAMPLERATE_133 0x31
+#define COM_SAMPLERATE_START COM_SAMPLERATE_133
 #define COM_SURVEYSCAN     0x2B
 #define COM_QUERY          0x2A
 #define COM_FLASH          0xff
 #define COM_CHECKSUM       0x63
+
+#define COM_NORMAL_SENSE_MODE	0xDB
+#define COM_LOW_SENSE_MODE	0xDC
+
+#define COM_REQUEST_SENSE_MODE	0xDD
 
 /* query data format */
 #define EPEN_REG_HEADER 0x00
@@ -245,6 +256,7 @@ struct wacom_i2c {
 	bool power_enable;
 	bool boot_mode;
 	bool query_status;
+	int wcharging_mode;
 #ifdef LCD_FREQ_SYNC
 	int lcd_freq;
 	bool lcd_freq_wait;

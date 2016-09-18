@@ -57,9 +57,18 @@
 #endif
 
 #ifdef CONFIG_SOC_EXYNOS5433
-#define POWER_COEFF_15P		55 /* percore param */
-#define POWER_COEFF_7P		13 /* percore param */
+#define POWER_COEFF_15P		48 /* percore param */
+#define POWER_COEFF_7P		9 /* percore param */
 #endif
+
+static unsigned int KFC_MIN_FREQ = 400000;
+static unsigned int KFC_MAX_FREQ = 1300000;
+static unsigned int CPU_MIN_FREQ = 700000;
+static unsigned int CPU_MAX_FREQ = 1900000;
+module_param_named(kfc_min_freq, KFC_MIN_FREQ, uint, S_IWUSR | S_IRUGO);
+module_param_named(kfc_max_freq, KFC_MAX_FREQ, uint, S_IWUSR | S_IRUGO);
+module_param_named(cpu_min_freq, CPU_MIN_FREQ, uint, S_IWUSR | S_IRUGO);
+module_param_named(cpu_max_freq, CPU_MAX_FREQ, uint, S_IWUSR | S_IRUGO);
 
 #define VOLT_RANGE_STEP		25000
 
@@ -1148,13 +1157,8 @@ static int exynos_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	ret = cpufreq_frequency_table_cpuinfo(policy, exynos_info[cur]->freq_table);
 	
 	if (!ret) {
-		if (cur == CA7) {
-			policy->min = 400000;
-			policy->max = 1300000;
-		} else {
-			policy->min = 700000;
-			policy->max = 1900000;
-		}
+		policy->min = cur == CA15 ? CPU_MIN_FREQ : KFC_MIN_FREQ;
+		policy->max = cur == CA15 ? CPU_MAX_FREQ : KFC_MAX_FREQ;
 	}
 
 	return ret;
@@ -1367,7 +1371,6 @@ static ssize_t store_cpufreq_max_limit(struct kobject *kobj, struct attribute *a
 	return count;
 }
 #endif
-
 
 static size_t get_freq_table_size(struct cpufreq_frequency_table *freq_table)
 {
@@ -1922,6 +1925,10 @@ static int exynos_kfc_min_qos_handler(struct notifier_block *b, unsigned long va
 	threshold_freq = cpufreq_interactive_get_hispeed_freq(0);
 	if (!threshold_freq)
 		threshold_freq = 1000000;	/* 1.0GHz */
+#elif defined(CONFIG_CPU_FREQ_GOV_CAFACTIVE)
+	threshold_freq = cpufreq_cafactive_get_hispeed_freq(0);
+	if (!threshold_freq)
+		threshold_freq = 1000000;	/* 1.0GHz */
 #else
 	threshold_freq = 1000000;	/* 1.0GHz */
 #endif
@@ -2374,7 +2381,7 @@ err_alloc_info_CA7:
 	return ret;
 }
 
-#ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_INTERACTIVE
+#if defined(CONFIG_CPU_FREQ_DEFAULT_GOV_INTERACTIVE) || defined(CONFIG_CPU_FREQ_DEFAULT_GOV_CAFACTIVE)
 device_initcall(exynos_cpufreq_init);
 #else
 late_initcall(exynos_cpufreq_init);

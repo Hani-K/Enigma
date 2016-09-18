@@ -36,6 +36,7 @@
 
 #define CPUFREQ_TRANSITION_NOTIFIER	(0)
 #define CPUFREQ_POLICY_NOTIFIER		(1)
+#define CPUFREQ_GOVINFO_NOTIFIER	(2)
 
 #ifdef CONFIG_CPU_FREQ
 int cpufreq_register_notifier(struct notifier_block *nb, unsigned int list);
@@ -54,6 +55,20 @@ static inline int cpufreq_unregister_notifier(struct notifier_block *nb,
 }
 static inline void disable_cpufreq(void) { }
 #endif		/* CONFIG_CPU_FREQ */
+
+/* Govinfo Notifiers */
+#define CPUFREQ_LOAD_CHANGE		(0)
+
+/*
+ * Governor specific info that can be passed to modules that subscribe
+ * to CPUFREQ_GOVINFO_NOTIFIER
+ */
+struct cpufreq_govinfo {
+	unsigned int cpu;
+	unsigned int load;
+	unsigned int sampling_rate_us;
+};
+extern struct atomic_notifier_head cpufreq_govinfo_notifier_list;
 
 /* if (cpufreq_driver->target) exists, the ->governor decides what frequency
  * within the limits is used. If (cpufreq_driver->setpolicy> exists, these
@@ -311,6 +326,13 @@ static inline void cpufreq_verify_within_limits(struct cpufreq_policy *policy, u
 	return;
 }
 
+static inline void
+cpufreq_verify_within_cpu_limits(struct cpufreq_policy *policy)
+{
+	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
+			policy->cpuinfo.max_freq);
+}
+
 struct freq_attr {
 	struct attribute attr;
 	ssize_t (*show)(struct cpufreq_policy *, char *);
@@ -399,6 +421,9 @@ extern struct cpufreq_governor cpufreq_gov_performance;
 #ifdef CONFIG_CPU_FREQ_GOV_INTERACTIVE
 extern unsigned int cpufreq_interactive_get_hispeed_freq(int cpu);
 #endif
+#ifdef CONFIG_CPU_FREQ_GOV_CAFACTIVE
+extern unsigned int cpufreq_cafactive_get_hispeed_freq(int cpu);
+#endif
 #ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_performance)
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_POWERSAVE)
@@ -419,6 +444,9 @@ extern struct cpufreq_governor cpufreq_gov_ktoonservative;
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_INTERACTIVE)
 extern struct cpufreq_governor cpufreq_gov_interactive;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_interactive)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_CAFACTIVE)
+extern struct cpufreq_governor cpufreq_gov_cafactive;
+#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_cafactive)
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_DANCEDANCE)
 extern struct cpufreq_governor cpufreq_gov_dancedance;
 #define CPUFREQ_DEFAULT_GOVERNOR 	(&cpufreq_gov_DANCEDANCE)

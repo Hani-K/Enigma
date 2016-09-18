@@ -7,3 +7,4 @@ obj-$(CONFIG_EPEN_WACOM_G9PL)	+= w9002_flash.o
 obj-$(CONFIG_EPEN_WACOM_G9PLL)	+= w9002_flash.o
 obj-$(CONFIG_EPEN_WACOM_G10PM)	+= w9002_flash.o
 obj-$(CONFIG_EPEN_WACOM_W9012)	+= w9012_flash.o
+obj-$(CONFIG_EPEN_WACOM_W9014)	+= w9014_flash.o

@@ -292,6 +292,6 @@ enum exynos5_gpio_number {
 
 /* define the number of gpios */
 
-#define ARCH_NR_GPIOS		(CONFIG_SAMSUNG_GPIO_EXTRA + S3C_GPIO_END)
+//#define ARCH_NR_GPIOS		(CONFIG_SAMSUNG_GPIO_EXTRA + S3C_GPIO_END)
 
 #endif /* __ASM_ARCH_GPIO_H */
