@@ -28,7 +28,9 @@
 
 #include <linux/mfd/arizona/core.h>
 #include <linux/mfd/arizona/registers.h>
+#ifdef CONFIG_ARIZONA_CONTROL
 #include <linux/mfd/arizona/control.h>
+#endif
 
 #include "arizona.h"
 #include "wm_adsp.h"
@@ -2188,7 +2190,9 @@ static int florida_codec_probe(struct snd_soc_codec *codec)
 		return ret;
 	}
 
+#ifdef CONFIG_ARIZONA_CONTROL
 	arizona_control_init(codec);
+#endif
 
 	return 0;
 }
