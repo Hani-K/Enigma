@@ -1,0 +1,42 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:"LOGS",
+    elements:[
+	{ SPane:{
+		title:"Log Creation"
+	}},
+	{ SCheckBox:{
+		description:" Enable or Disable Android logger. You must enable to save the latest logcat output to file. Default is OFF.",
+		label:"Enable logger_mode",
+		default:`cat /sys/kernel/logger_mode/logger_mode`,
+		action:"generic /sys/kernel/logger_mode/logger_mode"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Save logcat",
+		action:"log logcat"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Save dmesg",
+		action:"log dmesg"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Save last_kmsg",
+		action:"log kmsg"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+    ]
+}
+CTAG

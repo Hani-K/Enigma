@@ -1,0 +1,172 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:BATTERY,
+    elements:[
+	{ SPane:{
+		title:"Battery Info"
+	}},
+        { SLiveLabel:{
+                  action:"charge-source"
+        }},
+	{ SLiveLabel:{
+		refresh:1000,
+		action:"live batttype"
+	}},
+	{ SLiveLabel:{
+		refresh:1000,
+		action:"live battcurrav"
+	}},
+	{ SLiveLabel:{
+		refresh:1000,
+		action:"live battcurrnow"
+	}},
+	{ SLiveLabel:{
+		refresh:9000,
+		action:"live battvoltnow"
+	}},
+	{ SLiveLabel:{
+		refresh:1000,
+		action:"live batttemp"
+	}},
+	{ SLiveLabel:{
+		refresh:1000,
+		action:"live battcapa"
+	}},
+	{ SLiveLabel:{
+		refresh:1000,
+		action:"live battstatus"
+	}},
+	{ SLiveLabel:{
+		refresh:9000,
+		action:"live batthealth"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SPane:{
+		title:"Enable/Disable FastCharge"
+	}},
+	{ SDescription:{
+		description:" Default is Disabled."
+	}},
+	{ SDescription:{
+		description:" Enabled_FastCharge will substitute AC to USB."
+	}},
+	{ SDescription:{
+		description:" Enabled_FastCharge_with_Custom_Levels will use custom mA as user set below."
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SOptionList:{
+		default:`echo $(/res/synapse/actions/battery fastcharge)`,
+		action:"battery fastcharge",
+		values:[Disabled, Enabled_FastCharge, Enabled_FastCharge_with_Custom_Levels,]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+        { SCheckBox:{
+                description:" Use MTP during fast charge. Default is Enabled.",
+                label:"Use MTP",
+		default:`cat /sys/kernel/fast_charge/use_mtp_during_fast_charge`,
+                action:"generic /sys/kernel/fast_charge/use_mtp_during_fast_charge"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+        { SCheckBox:{
+                description:" Use Samsung screen ON charging limit whilst charging. Default is Enabled.",
+                label:"Screen ON current limit",
+		default:`cat /sys/kernel/fast_charge/screen_on_current_limit`,
+                action:"generic /sys/kernel/fast_charge/screen_on_current_limit"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Custom_Levels settings",
+		description:" Only possible when FastCharge Custom_Levels is selected."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"Set AC Custom Charge Level",
+		description:" Default is 2100.",
+		unit:" mA",
+		default:`cat /sys/kernel/fast_charge/ac_charge_level`,
+		action:"generic /sys/kernel/fast_charge/ac_charge_level",
+		values:[`while read values; do busybox printf "%s, \n" $values; done < /sys/kernel/fast_charge/ac_levels`]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"Set USB Custom Charge Level",
+		description:" Default is 460.",
+		unit:" mA",
+		default:`cat /sys/kernel/fast_charge/usb_charge_level`,
+		action:"generic /sys/kernel/fast_charge/usb_charge_level",
+		values:[`while read values; do busybox printf "%s, \n" $values; done < /sys/kernel/fast_charge/usb_levels`]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"Set WIRELESS Custom Charge Level",
+		description:" Default is 650.",
+		unit:" mA",
+		default:`cat /sys/kernel/fast_charge/wireless_charge_level`,
+		action:"generic /sys/kernel/fast_charge/wireless_charge_level",
+		values:[`while read values; do busybox printf "%s, \n" $values; done < /sys/kernel/fast_charge/wireless_levels`]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SCheckBox:{
+		description:" If disabled you allow anything up to 2.1A/h to be used as AC / USB / Wireless custom current.",
+		label:"Un-check to disable - ON YOUR OWN RISK",
+		default:`cat /sys/kernel/fast_charge/failsafe`,
+		action:"generic /sys/kernel/fast_charge/failsafe"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SPane:{
+		title:"Battery Scaling Calibration",
+		description:" If you are having incorrect battery SCALING issues, this will reset your device battery % to scale correctly to the approximate available mV. Give it a few hours after you reset the gauge. It may still show you funny values for that period, then the battery percentage should be fine after a full charge cycle."
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SDescription:{
+		description:" 1- Push button < Reset Fuel-Gauge Chip Now >"
+	}},
+	{ SDescription:{
+		description:" 2- Reboot device"
+	}},
+	{ SDescription:{
+		description:" 3- Deplete battery to 5-10 % (NOT ZERO)"
+	}},
+	{ SDescription:{
+		description:" 4- Charge UNINTERUPTED until FULL (don't touch)"
+	}},
+	{ SDescription:{
+		description:" 5- Unplug then use normally. Device should re-calibrate itself"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SButton:{
+		label:"Reset Fuel-Gauge Chip Now",
+		action:"battery fuel-gauge"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+    ]
+}
+CTAG

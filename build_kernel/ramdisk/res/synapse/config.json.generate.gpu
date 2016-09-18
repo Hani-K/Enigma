@@ -1,0 +1,136 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:GPU,
+    elements:[
+        { SPane:{
+                title:"GPU state"
+        }},
+        { SLiveLabel:{
+                title:"GPU live frequency",
+                refresh:500,
+                action:"live gpu"
+        }},
+	{ SLiveLabel:{
+                title:"Time in States",
+		refresh:2500,
+		action:"live LiveGPUTime 0 8"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+                title:"GPU power policy control",
+                description:" COARSE DEMAND power policy is to control only external power (PMU for G3D). It is better at saving power and performance. DEMAND policy controls internal core power when processing a job, so it can be controlled frequently rendering one frame. This frequent control affect job utilization. So power consumption on DVFS with demand power policy is higher than coarse demand. COARSE DEMAND turns off GPU power in case of being no job for 100ms and turns it on in case of incomming first job on the state of GPU off. Default is coarse_demand."
+        }},
+	{ SDescription:{
+		description:""
+	}},
+        { SOptionList:{
+                title:"Mali power policy control",
+                default:`echo $(/res/synapse/actions/bracket-option /sys/devices/14ac0000.mali/power_policy)`,
+                action:"bracket-option /sys/devices/14ac0000.mali/power_policy",
+                values:[
+`
+                        for POLICY in \`cat /sys/devices/14ac0000.mali/power_policy | sed -e 's/\]//;s/\[//'\`; do
+                          echo "\"$POLICY\","
+                        done
+`
+                ]
+        }},
+        { SPane:{
+                title:"GPU scaling settings",
+                description:"By editing the following configurables you can change the performance behaviour of the GPU."
+        }},
+       { SSeekBar:{
+                title:"GPU max freq",
+                description:"Set the maximum freqency the GPU scales up to.",
+                default:`cat /sys/devices/14ac0000.mali/max_clock`,
+                unit:"MHz",
+                action:"generic /sys/devices/14ac0000.mali/max_clock",
+                values:{
+`
+                        while read FREQ VOLT; do
+                                        LABEL=$(expr $FREQ)
+                                echo "$FREQ:\"${LABEL}MHz\", "
+                        done < /sys/devices/14ac0000.mali/volt_table
+`
+                }
+}},
+        { SSeekBar:{
+                title:"GPU min freq",
+                description:"Set the minimum freqency the GPU scales up to.",
+                default:`cat /sys/devices/14ac0000.mali/min_clock`,
+                unit:"MHz",
+                action:"generic /sys/devices/14ac0000.mali/min_clock",
+                values:[160, 266, 350, 420, 500, 550, 600,]
+}},
+        { SDescription:{
+                description:""
+        }},
+		        { SPane:{
+                title:"GPU GOVERNOR",
+                description:""
+        }},
+        { SOptionList:{
+                default:`echo $(/res/synapse/actions/network gpu_gov)`,
+                action:"network gpu_gov",
+                values:[Default, Interactive, Static, Booster]
+        }},
+        { SPane:{
+                title:"GPU Interactive governor stuff",
+                description:""
+        }},
+		{ SSeekBar:{
+                title:"GPU highspeed clock",
+                description:"Boost the minimum freqency the GPU scales up to this.",
+                default:`cat /sys/devices/14ac0000.mali/highspeed_clock`,
+                unit:"MHz",
+                action:"generic /sys/devices/14ac0000.mali/highspeed_clock",
+                values:{
+`
+                        while read FREQ VOLT; do
+                                        LABEL=$(expr $FREQ)
+                                echo "$FREQ:\"${LABEL}MHz\", "
+                        done < /sys/devices/14ac0000.mali/volt_table
+`
+                }
+}},
+		{ SSeekBar:{
+                title:"GPU highspeed load",
+                description:"Jump the minimum freqency level to highspeed_clock when the GPU utilization over this setted up value.",
+                default:`cat /sys/devices/14ac0000.mali/highspeed_load`,
+				max:100, min:1, unit:"%", step:1,
+                action:"generic /sys/devices/14ac0000.mali/highspeed_load",
+}},
+		{ SSeekBar:{
+                title:"GPU highspeed delay",
+                description:"Jump the minimum freqency level to highspeed_clock when the GPU utilization over highspeed_load and over this delayed value.",
+                default:`cat /sys/devices/14ac0000.mali/highspeed_delay`,
+                max:100, min:0, unit:"ms", step:1,
+                action:"generic /sys/devices/14ac0000.mali/highspeed_delay",
+}},
+        { SDescription:{
+                description:""
+	}},
+	{ SPane:{
+		title:"GPU voltage control",
+		description:" Decreasing voltage will lower power consumption of the GPU. Increasing it on overclocked frequencies improves stability. Too low voltage may cause instabilities and freezes." 
+        }},
+	{ SDescription:{
+		description:""
+	}},
+`
+while read FREQ VOLT; do
+        echo '{ SSeekBar:{'
+                echo 'title:"'$FREQ' MHz", default:'$VOLT', '
+                echo 'action:"gpuvolt '${FREQ}'", unit:" mV", weight:0.001, min:700000, max:1187500, step:6250 }}, '
+done < /sys/devices/14ac0000.mali/volt_table
+`
+	{ SDescription:{
+		description:""
+	}},
+    ]
+}
+CTAG

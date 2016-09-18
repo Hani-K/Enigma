@@ -1,0 +1,182 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:BACKUP RESTORE,
+    elements:[
+	{ SDescription:{
+		description:" ** NOTE: New backup profiles and kernel images are only visible in the list after device REBOOT and SYNAPSE BOOT COMPLETED message !!"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ STitleBar:{
+		title:"Configuration Profiles"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SGeneric:{
+		title:"Profile Name",
+		default:"None",
+		action:"generic /res/synapse/SkyHigh/bck_prof",
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SDescription:{
+		description:" First set a name above and apply. After this you can press the Backup Current Profile button below."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Backup Current Profile",
+		action:"restorebackup keepconfig",
+		notify:[
+			{
+				on:APPLY,
+				do:[ REFRESH, APPLY ],
+				to:"generic /res/synapse/SkyHigh/bck_prof"
+			}
+		]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SOptionList:{
+		title:"Selected Profile",
+		description:" Choose the settings you want and apply your choice in Synapse before using the action buttons below.",
+		action:"restorebackup pickconfig",
+		default:"None",
+		values:[ "None",
+			`for BAK in \`/res/synapse/actions/restorebackup listconfig\`; do
+				echo "\"$BAK\","
+			done`
+		],
+		notify:[
+			{
+				on:APPLY,
+				do:[ REFRESH, APPLY ],
+				to:"generic /res/synapse/SkyHigh/bck_prof"
+			}
+		]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SDescription:{
+		description:" NOTE: After you restore a profile and press Restart Synapse, you MUST also press the [X] (Cancel) button on top to load the new settings!"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Restore Selected Profile",
+		action:"restorebackup applyconfig",
+		notify:[
+			{
+				on:APPLY,
+				do:[ REFRESH, APPLY ],
+				to:"restorebackup pickconfig"
+			}
+		]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Restart Synapse",
+		action:"devtools restart"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Delete Selected Profile",
+		action:"restorebackup delconfig",
+		notify:[
+			{
+				on:APPLY,
+				do:[ REFRESH, APPLY ],
+				to:"restorebackup pickconfig"
+			}
+		]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ STitleBar:{
+		title:"Kernel Image"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SGeneric:{
+		title:"Kernel Name",
+		default:"None",
+		action:"generic /res/synapse/SkyHigh/bck_kernel",
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SDescription:{
+		description:" First set a name above and apply. After this you can press the Backup Current Kernel button below."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Backup Current Kernel",
+		action:"restorebackup keepboot /dev/block/platform/15540000.dwmmc0/by-name/BOOT",
+		notify:[
+			{
+				on:APPLY,
+				do:[ REFRESH, APPLY ],
+				to:"generic /res/synapse/SkyHigh/bck_kernel"
+			}
+		]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SOptionList:{
+		title:"Selected Image",
+        	description:" Choose the image you want. APPLY & REBOOT.",
+		action:"restorebackup pickboot",
+       		default:"None",
+		values:[ "None",
+`
+			for IMG in \`/res/synapse/actions/restorebackup listboot\`; do
+			  echo "\"$IMG\","
+			done
+`
+		]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+    	{ SButton:{
+		label:"Restore Selected Kernel",
+		action:"restorebackup flashboot /dev/block/platform/15540000.dwmmc0/by-name/BOOT"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+    	{ SButton:{
+		label:"Delete Selected Kernel",
+		action:"restorebackup delboot",
+		notify:[
+			{
+				on:APPLY,
+				do:[ RESET, REFRESH, ],
+				to:"restorebackup pickboot"
+			}
+		]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+    ]
+}
+CTAG

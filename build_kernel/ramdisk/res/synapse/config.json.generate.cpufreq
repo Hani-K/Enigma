@@ -1,0 +1,158 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:CPU FREQ,
+    elements:[
+        { STitleBar:{
+                title:"CPU Frequency Scaling"
+        }},
+	{ SDescription:{
+		description:""
+	}},
+        { STitleBar:{
+                title:"A57 big Cores"
+        }},
+	{ SDescription:{
+		description:""
+	}},
+	{ SLiveLabel:{
+                title:"A57 big Cores live frequency",
+		refresh:1000,
+		action:"live LivebigFrequency"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+       		title:"A57 big Cores MAX frequency",
+		description:" Set the maximum frequency the CPU big Cores scale up to. Default is 1900 MHz.",
+		default:`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq_kt`,
+		action:"generic /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq_kt",
+		values:{
+`
+			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/cpu_freq_table); do
+                                        LABEL=$(expr $FREQ / 1000)
+                                echo "$FREQ:\"${LABEL} MHz\", "
+			done
+`
+		}
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+       		title:"A57 big Cores MIN frequency",
+		description:" Set the maximum frequency the CPU big Cores scale down to. Default is 700 MHz.",
+		default:`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq_kt`,
+		action:"generic /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq_kt",
+		values:{
+`
+			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/cpu_freq_table); do
+                                        LABEL=$(expr $FREQ / 1000)
+                                echo "$FREQ:\"${LABEL} MHz\", "
+			done
+`
+		}
+	}},
+	{ SDescription:{
+		description:""
+	}},
+        { STitleBar:{
+                title:"A53 LITTLE Cores"
+        }},
+	{ SDescription:{
+		description:""
+	}},
+	{ SLiveLabel:{
+                title:"A53 LITTLE Cores live frequency",
+		refresh:500,
+		action:"live LiveLITTLEFrequency"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+       		title:"A53 LITTLE Cores MAX frequency",
+		description:" Set the maximum frequency the CPU LITTLE Cores scale up to. Default is 1300 MHz.",
+		default:`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq_kt`,
+		action:"generic /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq_kt",
+		values:{
+`
+			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/kfc_freq_table); do
+                                        LABEL=$(expr $FREQ / 1000)
+                                echo "$FREQ:\"${LABEL} MHz\", "
+			done
+`
+		}
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+       		title:"A53 LITTLE Cores MIN frequency",
+		description:" Set the minimum frequency the CPU LITTLE Cores scale down to. Default is 400 MHz.",
+		default:`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq_kt`,
+		action:"generic /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq_kt",
+		values:{
+`
+			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/kfc_freq_table); do
+                                        LABEL=$(expr $FREQ / 1000)
+                                echo "$FREQ:\"${LABEL} MHz\", "
+			done
+`
+		}
+	}},
+	{ SDescription:{
+		description:""
+	}},
+        { STitleBar:{
+                title:"Screen Off CPU scaling"
+        }},
+	{ SDescription:{
+		description:""
+	}},
+	{ SOptionList:{
+		title:"Screen Off scaling enable",
+		description:"Set the separate maximum frequency on both clusters then the screen is Off.",
+		default:`$BB cat /sys/devices/system/cpu/cpu0/cpufreq/screen_off_scaling_enable`,
+		action:"generic /sys/devices/system/cpu/cpu0/cpufreq/screen_off_scaling_enable",
+		values:{0:"Disabled", 1:"Enabled"}
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+       		title:"A53 LITTLE Cores Screen Off MAX frequency",
+		description:" Set the maximum frequency on LITTLE Cores then the screen is Off. Default is 1300 MHz.",
+		default:`cat /sys/devices/system/cpu/cpu0/cpufreq/screen_off_scaling_mhz_cl0`,
+		action:"generic /sys/devices/system/cpu/cpu0/cpufreq/screen_off_scaling_mhz_cl0",
+		values:{
+`
+			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/kfc_freq_table); do
+                                        LABEL=$(expr $FREQ / 1000)
+                                echo "$FREQ:\"${LABEL} MHz\", "
+			done
+`
+		}
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+       		title:"A57 big Cores Screen Off MAX frequency",
+		description:" Set the maximum frequency on big Cores then the screen is Off. Default is 1900 MHz.",
+		default:`cat /sys/devices/system/cpu/cpu4/cpufreq/screen_off_scaling_mhz_cl1`,
+		action:"generic /sys/devices/system/cpu/cpu4/cpufreq/screen_off_scaling_mhz_cl1",
+		values:{
+`
+			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/cpu_freq_table); do
+                                        LABEL=$(expr $FREQ / 1000)
+                                echo "$FREQ:\"${LABEL} MHz\", "
+			done
+`
+		}
+	}},
+    ]
+}
+CTAG

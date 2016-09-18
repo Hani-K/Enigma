@@ -1,0 +1,145 @@
+BB=/sbin/busybox;
+
+# SQLite log location
+LOGS=/sdcard/Synapse/Logs/SQLite.txt;
+
+case $1 in
+  reboot)
+	echo "0" > /sys/kernel/dyn_fsync/Dyn_fsync_active;
+	$BB sync;
+	$BB sleep 1;
+	reboot $2;
+  ;;
+  cleardata)
+	am force-stop com.af.synapse 2> /dev/null;
+	$BB sleep 1;
+	$BB rm -R /data/data/com.af.synapse/databases;
+	$BB sync;
+	$BB sleep 1;
+	am start -a android.intent.action.MAIN -n com.af.synapse/.MainActivity 2> /dev/null;
+  ;;
+  restart)
+    	am force-stop com.af.synapse 2> /dev/null;
+    	$BB sleep 1;
+    	reset_uci;
+	$BB sync;
+    	$BB sleep 1;
+    	am start -a android.intent.action.MAIN -n com.af.synapse/.MainActivity 2> /dev/null;
+  ;;
+  fix_wifi)
+	svc wifi disable 2> /dev/null;
+	rm -f /data/misc/dhcp/dhcpcd*;
+	svc wifi enable 2> /dev/null;
+	echo "WIFI Release Renew is DONE";
+  ;;
+  selinux)	
+	if [[ ! -z $2 ]]; then
+		if [ $2 = "Enforcing" ]; then
+			setenforce 1;
+		elif [ $2 = "Permissive" ]; then
+			setenforce 0;
+		fi;
+	fi;
+
+	$BB echo `getenforce`;
+	#/sys/fs/selinux/enforce
+  ;;
+  optimizedb)
+	if [ -e $LOGS ]; then
+		rm $LOGS;
+	fi;
+
+	# Create Log folder on sdcard
+	LOG=/sdcard/Synapse/Logs;
+
+	[ ! -d "$LOG" ] && mkdir -p "$LOG";
+	chmod 755 $LOG
+
+	echo "SQLite database VACUUM and REINDEX started at $( date +"%m-%d-%Y %H:%M:%S" )" | tee -a $LOGS;
+
+	for i in `$BB find /data -iname "*.db"`; do 
+		sbin/sqlite3 $i 'VACUUM;' 2> /dev/null;
+			resVac=$?
+			if [ $resVac == 0 ]; then
+				resVac="SUCCESS";
+			else
+				resVac="ERRCODE-$resVac";
+			fi;
+		sbin/sqlite3 $i 'REINDEX;' 2> /dev/null;
+			resIndex=$?
+			if [ $resIndex == 0 ]; then
+				resIndex="SUCCESS";
+			else
+				resIndex="ERRCODE-$resIndex";
+			fi;
+		echo "Database $i:  VACUUM=$resVac  REINDEX=$resIndex" | tee -a $LOGS;
+	done;
+
+	for i in `$BB find /sdcard -iname "*.db"`; do
+		sbin/sqlite3 $i 'VACUUM;' 2> /dev/null;
+			resVac=$?
+			if [ $resVac == 0 ]; then
+				resVac="SUCCESS";
+			else
+				resVac="ERRCODE-$resVac";
+			fi;
+		sbin/sqlite3 $i 'REINDEX;' 2> /dev/null;
+			resIndex=$?
+			if [ $resIndex == 0 ]; then
+				resIndex="SUCCESS";
+			else
+				resIndex="ERRCODE-$resIndex";
+			fi;
+		echo "Database $i:  VACUUM=$resVac  REINDEX=$resIndex" | tee -a $LOGS;
+	done;
+		echo "SQLite database VACUUM and REINDEX finished at $( date +"%m-%d-%Y %H:%M:%S" )" | tee -a $LOGS;
+		
+	$BB echo "Databases have been optimized";
+  ;;
+  fstrim)
+	echo -e "Trim /data"
+	/sbin/fstrim -v /data
+	echo -e ""
+	echo -e "Trim /cache"
+	/sbin/fstrim -v /cache
+	echo -e ""
+	echo -e "Trim /system"
+	/sbin/fstrim -v /system
+	echo -e ""
+	$BB sync
+  ;;
+  wipe_cache_reboot)
+	echo "0" > /sys/kernel/dyn_fsync/Dyn_fsync_active;
+	$BB rm -rf /cache/*
+	$BB sync;
+	$BB sleep 1;
+	/system/bin/reboot;
+  ;;
+  wipe_dalvik_reboot)
+	echo "0" > /sys/kernel/dyn_fsync/Dyn_fsync_active;
+	$BB rm -rf /data/dalvik-cache/*
+	$BB sync;
+	$BB sleep 1;
+	/system/bin/reboot;
+  ;;
+  wipe_cache-dalvik_reboot)
+	echo "0" > /sys/kernel/dyn_fsync/Dyn_fsync_active;
+	$BB rm -rf /cache/*
+	$BB rm -rf /data/dalvik-cache/*
+	$BB sync;
+	$BB sleep 1;
+	/system/bin/reboot;
+  ;;
+  wipe_clip_cache)
+	$BB rm -rf /data/clipboard/*
+	$BB sync;
+	$BB sleep 1;
+	echo "Clipboard cache is wiped";
+  ;;
+  wipe_tombstones)
+	$BB rm -rf /data/tombstones/*
+	$BB sync;
+	$BB sleep 1;
+	echo "Tombstones are wiped";
+  ;;
+esac;

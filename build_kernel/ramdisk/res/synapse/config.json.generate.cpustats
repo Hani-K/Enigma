@@ -1,0 +1,60 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:CPU STATS,
+    elements:[
+        { SPane:{
+                title:"Device State"
+        }},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"ASV Group",
+		description:"Values: from 0 (Lowest) to 15 (Highest). The higher the ASV, the higher frequencies your device can run and lower voltages"
+	}},
+	{ SLiveLabel:{
+		refresh:10000,
+		action:"show asv"
+	}},
+        { SLiveLabel:{
+		title:"Sensor tempteratures",
+                description:" Temperature sensor data as read from the A57 (4-7) cores. The A53 (0-3) cores do not have dedicated sensors.",
+                refresh:500,
+                action:"echo \$(echo \$(cat /sys/devices/10060000.tmu/curr_temp | tr , \"\\n\") | { read S0 S1 S2 S3 S4; echo \"S0: \${S0%?}°C@nS1: \${S1%?}°C@nS2: \${S2%?}°C@nS3: \${S3%?}°C@nS4: \${S4%?}°C\"; })"
+        }},
+	{ SLiveLabel:{
+                title:"A57 big Cores time in state",
+		refresh:2500,
+		action:"live LiveCPU_big_Time 0 9"
+	}},
+	{ SLiveLabel:{
+		refresh:2500,
+		action:"live LiveCPU_big_Time 10 15"
+	}},
+	{ SLiveLabel:{
+                title:"A57 big Cores unused frequencies",
+		refresh:2500,
+		action:"live LiveUnUsed_big"
+	}},
+	{ SLiveLabel:{
+                title:"A53 LITTLE Cores time in state",
+		refresh:2500,
+		action:"live LiveCPU_LITTLE_Time 0 9"
+	}},
+	{ SLiveLabel:{
+		refresh:2500,
+		action:"live LiveCPU_LITTLE_Time 10 17"
+	}},
+	{ SLiveLabel:{
+                title:"A53 LITTLE Cores unused frequencies",
+		refresh:2500,
+		action:"live LiveUnUsed_LITTLE"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+    ]
+}
+CTAG

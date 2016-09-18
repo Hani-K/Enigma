@@ -1,0 +1,175 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:ADVANCED,
+    elements:[
+	{ SPane:{
+                title:"HMP Thresholds up/down ratios for task migrating",
+                description:"Adjust HMP ratios for up/down scaling for tasks migrating from little to big domain and from big to little domain. Higher Upthresholds value make less battery using because domain more use Little domain."
+        }},
+        { SSeekBar:{
+                title:"HMP UP Thresholds",
+                min:1, max:1000, unit:"", step:1,
+                default:`cat /sys/kernel/hmp/up_threshold`,
+                action:"generic /sys/kernel/hmp/up_threshold"
+        }},
+	{ SDescription:{
+		description:""
+	}},
+        { SSeekBar:{
+                title:"HMP DOWN Thresholds",
+                min:1, max:512, unit:"", step:1,
+                default:`cat /sys/kernel/hmp/down_threshold`,
+                action:"generic /sys/kernel/hmp/down_threshold"
+        }},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Kernel Entropy"
+      	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SLiveLabel:{
+		title:"Entropy Available",
+		refresh:1000,
+		action:"live entropy"
+	}},
+	{ SSeekBar:{
+		title:"Read Wakeup Threshold",
+		max:2048, min:64, step:64,
+		default:`cat /proc/sys/kernel/random/read_wakeup_threshold`,
+		action:"generic /proc/sys/kernel/random/read_wakeup_threshold"
+	}},
+	{ SSeekBar:{
+		title:"Write Wakeup Threshold",
+		max:2048, min:64, step:64,
+		default:`cat /proc/sys/kernel/random/write_wakeup_threshold`,
+		action:"generic /proc/sys/kernel/random/write_wakeup_threshold"
+	}},
+	{ SPane:{
+		title:"PowerSuspend",
+		description:" PowerSuspend driver is a replacement for the early_suspend/late_resume driver. Hybrid uses autosleep & display panel hook. Default is Hybrid."
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SOptionList:{
+		default:`echo $(/res/synapse/actions/suspend powersuspend)`,
+		action:"suspend powersuspend",
+		values:[Autosleep_hook, Userspace_trigger, DisplayPanel_hook, Hybrid_hook,]
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SSeekBar:{
+		title:"PowerSuspend State",
+		description:" Kernel power management driver when screen is off. Better battery savings if enabled. Note: You can only change this setting if PowerSuspend Mode is set to Userspace_trigger.",
+		min:0,
+		max:1,
+		step:1,
+		default:`cat /sys/kernel/power_suspend/power_suspend_state`,
+		action:"suspend_state /sys/kernel/power_suspend/power_suspend_state"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SButton:{
+		label:"PowerSuspend version",
+		action:"show susp"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SPane:{
+		title:"Dynamic FSync",
+		description:" Requires PowerSuspend driver ENABLED"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SCheckBox:{
+		description:" While screen is on file sync is disabled, when screen is off a file sync is called to flush all outstanding writes and restore file sync operation as normal. Increases speed, but a possible decrease in data integrity, also could create reboot and kernel panic. Default is Enabled.",
+		label:"Enable Dynamic FSync",
+		default:`cat /sys/kernel/dyn_fsync/Dyn_fsync_active`,
+		action:"generic /sys/kernel/dyn_fsync/Dyn_fsync_active"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SButton:{
+		label:"Dynamic FSync version",
+		action:"show fsync"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SPane:{
+		title:"Power-Efficient Workqueues"
+      	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SOptionList:{
+		title:"Power-Efficient WQ",
+		description:"Enabling Power-Efficient Workqueues will help to reduce power consumption at the cost of slight performance overhead. By enabling this, PE workqueues are used for unbound scheduled work to save load on sibling CPU cores and queuing work on CPU 0.",
+		default:`$BB cat /sys/module/workqueue/parameters/power_efficient`,
+		action:"generic /sys/module/workqueue/parameters/power_efficient",
+		values:{N:"Disabled", Y:"Enabled"}
+	}},
+      	{ SDescription:{
+		description:""
+	}},
+      	{ SPane:{
+		title:"Gentle Fair Sleepers"
+      	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SCheckBox:{
+		description:" Sleeper Fairness is a concept used by CFS which treat sleeping/waiting tasks as if they were in a run queue. This implies tasks which spend most of the time waiting for an user input and such will get a fair share of CPU when they need it. Disabling Gentle Fair Sleepers could improve UI responsiveness. Default is Disabled.",
+		label:"Enable or Disable Gentle Fair Sleepers",
+		default:`cat /sys/kernel/sched/gentle_fair_sleepers`,
+		action:"generic /sys/kernel/sched/gentle_fair_sleepers"
+	}},
+      	{ SDescription:{
+		description:""
+	}},
+      	{ SPane:{
+		title:"Arch Power"
+      	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SCheckBox:{
+		description:" Arch Power patch causes arch dependent power functions to be used instead of generic high resolution timer ticks and double ticks. Default is Enabled.",
+		label:"Enable or Disable Arch Power",
+		default:`cat /sys/kernel/sched/arch_power`,
+		action:"generic /sys/kernel/sched/arch_power"
+	}},
+      	{ SDescription:{
+		description:""
+	}},
+      	{ SPane:{
+		title:"Randomisation"
+      	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"randomize_va_space",
+		description:" Disabling (0) virtual address randomisation may improve GUI responsiveness. Default is 0.",
+		max:2,
+		min:0,
+		step:1,
+		default:`cat /proc/sys/kernel/randomize_va_space`,
+		action:"generic /proc/sys/kernel/randomize_va_space"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+    ]
+}
+CTAG
