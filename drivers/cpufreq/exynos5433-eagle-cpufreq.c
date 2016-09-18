@@ -174,8 +174,8 @@ static int exynos5433_bus_table_CA15[CPUFREQ_LEVEL_END_CA15] = {
 	543000,		/* 1.2 GHz */
 	413000,		/* 1.1 GHz */
 	413000,		/* 1.0 GHz */
-	413000,		/* 900 MHz */
-	413000,		/* 800 MHz */
+	0,		/* 900 MHz */
+	0,		/* 800 MHz */
 	0,		/* 700 MHz */
 	0,		/* 600 MHz */
 	0,		/* 500 MHz */

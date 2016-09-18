@@ -897,6 +897,10 @@ config TOUCHSCREEN_MXT540E
 	  To compile this driver as a module, choose M here: the
 	  module will be called mxt540e.
 
+config WAKE_GESTURES
+	default y
+   	bool "Wake Gestures"
+
 config TOUCHSCREEN_SWEEP2WAKE
 	tristate "Sweep2Wake for touchscreens"
 	select TOUCHSCREEN_PREVENT_SLEEP

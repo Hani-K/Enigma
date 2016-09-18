@@ -2029,17 +2029,17 @@
 		throttle_table {
 			throttle_tab_0 {
 				temp = <75>;
-				freq_clip_max = <1800000>;
-				freq_clip_max_kfc = <1500000>;
+				freq_clip_max = <1700000>;
+				freq_clip_max_kfc = <1300000>;
 			};
 			throttle_tab_1 {
 				temp = <80>;
-				freq_clip_max = <1600000>;
-				freq_clip_max_kfc = <1500000>;
+				freq_clip_max = <1500000>;
+				freq_clip_max_kfc = <1300000>;
 			};
 			throttle_tab_2 {
 				temp = <85>;
-				freq_clip_max = <1200000>;
+				freq_clip_max = <1100000>;
 				freq_clip_max_kfc = <1300000>;
 			};
 			throttle_tab_3 {
