@@ -37,5 +37,10 @@ find . -name '*.org' -delete
 find . -name '*.*~' -delete
 find . -name '*~' -delete
 find . -name '*(копия)' -delete
+find . -name 'clean-junk.sh' -delete
+find . -name 'clean_kernel.sh' -delete
+find . -name 'clean-kernel.sh' -delete
+find . -name 'env_setup.sh' -delete
+cp env_setup1.sh env_setup.sh
 
 echo "${bldcya}***** Done *****${txtrst}";

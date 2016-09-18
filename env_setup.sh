@@ -41,7 +41,7 @@ export TMPFILE=`mktemp -t`;
 # system compiler
 # export CROSS_COMPILE=/home/serg/arm-eabi-4.9-cortex-a15-master_uber/bin/arm-eabi-;
 # export CROSS_COMPILE=/home/serg/arm-eabi-5.2-linaro/bin/arm-eabi-;
-export CROSS_COMPILE=/home/serg/arm-eabi-6.0/bin/arm-eabi-;
+export CROSS_COMPILE=/home/hani/android/toolchains/arm-linux-androideabi-5.1/bin/arm-eabi-;
 
 export NUMBEROFCPUS=`grep 'processor' /proc/cpuinfo | wc -l`;
 
